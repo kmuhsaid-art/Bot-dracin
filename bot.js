@@ -34,18 +34,16 @@ app.get('/api/drama', async (req, res) => {
   }
 });
 
-// --- 4. PERINTAH BOT ---
-
 // Paparan Utama (Start)
 bot.start((ctx) => {
   ctx.replyWithMarkdown(
     `👋 *Selamat Datang ke @${ctx.botInfo.username}*\n\n` +
     `Katalog drama sedia untuk dilayan! Klik butang di bawah untuk mula menonton.\n\n` +
-    `Satu-satunya tempat untuk anda layan drama China & Korea kegemaran secara percuma!.\n\n\` +
-    `📌 *CARA PENGGUNAAN:*
-     1. Klik butang 🎬 Katalog Drama di bawah.
-     2. Cari drama yang anda minat.
-     3. Atau taip terus nama drama: @nonton_dramacina_bot [nama drama].`),
+    `Satu-satunya tempat untuk anda layan drama China & Korea kegemaran secara percuma!\n\n` +
+    `📌 *CARA PENGGUNAAN:*\n` +
+    `1️⃣ Klik butang *🎬 Katalog Drama* di bawah.\n` +
+    `2️⃣ Cari drama yang anda minat.\n` +
+    `3️⃣ Atau guna fungsi carian: \`@${ctx.botInfo.username} [nama drama]\``,
      
     Markup.inlineKeyboard([
       [Markup.button.webApp('🎬 Katalog Drama', 'https://kmuhsaid-art.github.io/Bot-dracin/')]
