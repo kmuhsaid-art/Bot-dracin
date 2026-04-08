@@ -2,11 +2,11 @@ const { Telegraf, Markup } = require('telegraf');
 const express = require('express'); 
 const cors = require('cors');       
 const mongoose = require('mongoose'); 
+const axios = require('axios'); // Pastikan sudah install: npm install axios
 
 const app = express();
-// Pastikan cors diletakkan SEBELUM app.get('/api/drama')
 app.use(cors()); 
-app.use(express.json()); // Tambah ini juga untuk keselamatan data
+app.use(express.json()); 
 
 // --- 1. SAMBUNGAN MONGODB ---
 mongoose.connect('mongodb+srv://Hahihu:Blink182@cluster0.i1btqnj.mongodb.net/dracinDB?retryWrites=true&w=majority', {
@@ -37,15 +37,11 @@ app.get('/api/drama', async (req, res) => {
 
 // --- 4. LOGIK BOT TELEGRAM ---
 
-// Paparan Utama (Menu Grid)
+// Paparan Utama
 bot.start((ctx) => {
   ctx.replyWithMarkdown(
     `👋 *Selamat Datang ke @${ctx.botInfo.username}*\n\n` +
-    `Katalog drama sedia untuk dilayan! Klik butang di bawah untuk mula menonton.\n\n` +
-    `📌 *CARA PENGGUNAAN:*\n` +
-    `1️⃣ Klik butang *🎬 Katalog Drama* di bawah.\n` +
-    `2️⃣ Cari drama yang anda minat.\n` +
-    `3️⃣ Atau guna fungsi carian: \`@${ctx.botInfo.username} [nama drama]\``,
+    `Katalog drama sedia untuk dilayan! Klik butang di bawah untuk mula menonton.`,
     Markup.inlineKeyboard([
       [Markup.button.webApp('🎬 Katalog Drama', 'https://kmuhsaid-art.github.io/Bot-dracin/')],
       [
@@ -61,64 +57,41 @@ bot.start((ctx) => {
   );
 });
 
-// FUNGSI PAKEJ VIP (Harga yang anda berikan)
-bot.action('view_vip_packages', (ctx) => {
-  const hargaVIP = 
-    `🌟 *PAKEJ PREMIUM VIP* 🌟\n\n` +
-    `🎟️ *PILIHAN PAKEJ:* \n` +
-    `• 1 Hari — RM1\n` +
-    `• 3 Hari — RM2\n` +
-    `• 1 Minggu — RM5\n` +
-    `• 1 Bulan — RM25\n` +
-    `• 3 Bulan — RM60\n` +
-    `• 1 Tahun — RM250\n` +
-    `• *Selamanya — RM500*\n\n` +
-    `📌 *Cara Langgan:* Klik butang "Hubungi Admin" di bawah.`;
+// --- FUNGSI SYNC MELOLO (GABUNGAN BARU) ---
+bot.command('sync_melolo', async (ctx) => {
+  try {
+    ctx.reply("⏳ Sedang menyedut konten terbaru dari Melolo...");
+    
+    const response = await axios.get('https://melolo-api-azure.vercel.app/api/melolo/latest');
+    // Berdasarkan gambar JSON anda: data -> books
+    const dramas = response.data.data.books; 
 
-  ctx.editMessageText(hargaVIP, {
-    parse_mode: 'Markdown',
-    ...Markup.inlineKeyboard([
-      [Markup.button.url('👨‍💻 Hubungi Admin (Bayar)', 'https://t.me/m_asfanraza')],
-      [Markup.button.callback('⬅️ Kembali', 'back_to_start')]
-    ])
-  });
+    if (!dramas || dramas.length === 0) {
+      return ctx.reply("❌ Tiada data ditemui dalam API Melolo.");
+    }
+
+    let count = 0;
+    for (let item of dramas) {
+      const wujud = await Film.findOne({ judul: item.book_name });
+      
+      if (!wujud) {
+        await new Film({
+          judul: item.book_name,
+          deskripsi: item.abstract || "Drama pendek Melolo",
+          link: item.thumb_url, // Buat masa ini guna thumb_url sebagai link jika tiada link video direct
+          thumb: item.thumb_url
+        }).save();
+        count++;
+      }
+    }
+    ctx.reply(`✅ Berjaya! ${count} drama pendek Melolo telah ditambah.`);
+  } catch (err) {
+    console.error(err);
+    ctx.reply("❌ Ralat: Gagal menyambung ke API Melolo.");
+  }
 });
 
-// Fungsi Butang Kembali
-bot.action('back_to_start', (ctx) => {
-  ctx.editMessageText(`👋 Pilih menu utama di bawah:`, {
-    parse_mode: 'Markdown',
-    ...Markup.inlineKeyboard([
-      [Markup.button.webApp('🎬 Katalog Drama', 'https://kmuhsaid-art.github.io/Bot-dracin/')],
-      [
-        Markup.button.callback('👑 Beli VIP', 'view_vip_packages'),
-        Markup.button.callback('👤 Profil Saya', 'view_profile')
-      ],
-      [Markup.button.callback('📞 Bantuan', 'view_help')],
-      [
-        Markup.button.url('💸 Cari Cuan ↗️', 'https://t.me/m_asfanraza'),
-        Markup.button.url('🇲🇾 VIP Malaysia ↗️', 'https://t.me/m_asfanraza')
-      ]
-    ])
-  });
-});
-
-// Tambahan Fungsi Profil & Bantuan
-bot.action('view_profile', (ctx) => {
-  ctx.editMessageText(`👤 *PROFIL PENGGUNA*\n\n• ID: \`${ctx.from.id}\`\n• Status: 🆓 Percuma`, {
-    parse_mode: 'Markdown',
-    ...Markup.inlineKeyboard([[Markup.button.callback('⬅️ Kembali', 'back_to_start')]])
-  });
-});
-
-bot.action('view_help', (ctx) => {
-  ctx.editMessageText(`📞 *BANTUAN*\n\nAda masalah? Hubungi admin di @m_asfanraza`, {
-    parse_mode: 'Markdown',
-    ...Markup.inlineKeyboard([[Markup.button.callback('⬅️ Kembali', 'back_to_start')]])
-  });
-});
-
-// Fungsi Menambah Drama
+// Fungsi Menambah Drama Manual
 bot.command('add', async (ctx) => {
   const text = ctx.message.text.split('/add ')[1];
   if (!text) return ctx.reply("❌ Guna: /add Judul | Deskripsi | Link | Gambar");
@@ -129,6 +102,24 @@ bot.command('add', async (ctx) => {
   } catch (err) { ctx.reply("❌ Gagal simpan ke MongoDB."); }
 });
 
+// Bot Action (VIP, Profile, Help)
+bot.action('view_vip_packages', (ctx) => {
+  ctx.editMessageText(`🌟 *PAKEJ PREMIUM VIP* 🌟\n\n• 1 Hari — RM1\n• Selamanya — RM500`, {
+    parse_mode: 'Markdown',
+    ...Markup.inlineKeyboard([
+      [Markup.button.url('👨‍💻 Hubungi Admin', 'https://t.me/m_asfanraza')],
+      [Markup.button.callback('⬅️ Kembali', 'back_to_start')]
+    ])
+  });
+});
+
+bot.action('back_to_start', (ctx) => {
+  ctx.editMessageText(`👋 Pilih menu utama di bawah:`, Markup.inlineKeyboard([
+    [Markup.button.webApp('🎬 Katalog Drama', 'https://kmuhsaid-art.github.io/Bot-dracin/')],
+    [Markup.button.callback('⬅️ Kembali', 'back_to_start')]
+  ]));
+});
+//tes
 // --- 5. SETUP SERVER ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => console.log(`🚀 API di port ${PORT}`));
