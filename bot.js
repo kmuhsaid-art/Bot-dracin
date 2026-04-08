@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 
 // Gantikan 'KATA_LALUAN_ANDA' dengan password user 'Hahihu'
-mongoose.connect('mongodb+srv://Hahihu:Blink182@cluster0.xxxxx.mongodb.net/dracinDB?retryWrites=true&w=majority', {
+mongoose.connect('mongodb+srv://Hahihu:Blink182@cluster0.i1btqnj.mongodb.net/dracinDB?retryWrites=true&w=majority', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(() => console.log("✅ MongoDB Connected"))
