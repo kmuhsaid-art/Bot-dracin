@@ -45,7 +45,7 @@ bot.start((ctx) => {
     `📌 *CARA PENGGUNAAN:*
      1. Klik butang 🎬 Katalog Drama di bawah.
      2. Cari drama yang anda minat.
-     3. Atau taip terus nama drama: @nonton_dramacina_bot [nama drama].`,
+     3. Atau taip terus nama drama: @nonton_dramacina_bot [nama drama].`),
      
     Markup.inlineKeyboard([
       [Markup.button.webApp('🎬 Katalog Drama', 'https://kmuhsaid-art.github.io/Bot-dracin/')]
