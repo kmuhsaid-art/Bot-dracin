@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Katalog Drama HTML5</title>
+    <title>Katalog Drama Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: white; margin: 0; padding: 20px; }
@@ -14,16 +14,20 @@
         .card img { width: 100%; height: 200px; object-fit: cover; }
         .card-info { padding: 12px; text-align: center; }
         .card-title { font-size: 13px; font-weight: 600; margin-bottom: 10px; height: 35px; overflow: hidden; }
-        .btn-watch { display: block; background: linear-gradient(45deg, #27ae60, #2ecc71); color: white; padding: 10px; text-decoration: none; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .btn-watch { display: block; background: linear-gradient(45deg, #e67e22, #f39c12); color: white; padding: 10px; text-decoration: none; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; }
 
-        /* Modal Video Player HTML5 */
-        #videoPlayer {
+        /* Modal Video Player (Iframe) */
+        #videoContainer {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.98); z-index: 1000; flex-direction: column; justify-content: center;
+            background: black; z-index: 1000; flex-direction: column;
         }
-        video { width: 100%; max-height: 70vh; background: black; }
-        .close-btn { position: absolute; top: 20px; right: 20px; background: #e74c3c; color: white; padding: 10px 20px; border-radius: 50px; cursor: pointer; font-weight: bold; z-index: 1001; }
-        .video-controls { padding: 20px; text-align: center; color: #aaa; font-size: 14px; }
+        iframe { width: 100%; height: 100%; border: none; }
+        .close-btn { 
+            position: absolute; top: 10px; right: 10px; background: rgba(231, 76, 60, 0.8); 
+            color: white; padding: 8px 15px; border-radius: 5px; cursor: pointer; 
+            font-weight: bold; z-index: 1001; border: none;
+        }
+        .loading-text { color: #aaa; text-align: center; margin-top: 50vh; }
     </style>
 </head>
 <body>
@@ -31,15 +35,9 @@
     <h2>🎬 KATALOG DRAMA</h2>
     <div id="katalog" class="grid"></div>
 
-    <div id="videoPlayer">
-        <div class="close-btn" onclick="tutupVideo()">TUTUP [X]</div>
-        <video id="html5Video" controls controlsList="nodownload">
-            <source id="videoSource" src="" type="video/mp4">
-            Peranti anda tidak menyokong pemain video HTML5.
-        </video>
-        <div class="video-controls">
-            <p id="videoTitleDisplay"></p>
-        </div>
+    <div id="videoContainer">
+        <button class="close-btn" onclick="tutupVideo()">TUTUP [X]</button>
+        <iframe id="embedPlayer" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
     </div>
 
     <script>
@@ -62,7 +60,7 @@
                         <img src="${drama.thumb}" onerror="this.src='https://via.placeholder.com/200x300?text=Poster+Tiada'">
                         <div class="card-info">
                             <div class="card-title">${drama.judul}</div>
-                            <div class="btn-watch" onclick="bukaVideo('${drama.link}', '${drama.judul}')">▶️ TONTON</div>
+                            <div class="btn-watch" onclick="bukaVideo('${drama.link}')">▶️ TONTON</div>
                         </div>
                     `;
                     katalogDiv.appendChild(card);
@@ -73,24 +71,21 @@
             }
         }
 
-        function bukaVideo(url, judul) {
-            const player = document.getElementById('videoPlayer');
-            const video = document.getElementById('html5Video');
-            const source = document.getElementById('videoSource');
-            const titleDisplay = document.getElementById('videoTitleDisplay');
+        function bukaVideo(url) {
+            const container = document.getElementById('videoContainer');
+            const iframe = document.getElementById('embedPlayer');
             
-            source.src = url;
-            titleDisplay.innerText = "Sedang Memainkan: " + judul;
-            video.load(); // Wajib untuk muat pautan video baru
-            player.style.display = 'flex';
-            video.play();
+            // Masukkan link dari database ke dalam iframe
+            iframe.src = url;
+            container.style.display = 'flex';
         }
 
         function tutupVideo() {
-            const player = document.getElementById('videoPlayer');
-            const video = document.getElementById('html5Video');
-            video.pause(); // Hentikan bunyi
-            player.style.display = 'none';
+            const container = document.getElementById('videoContainer');
+            const iframe = document.getElementById('embedPlayer');
+            
+            iframe.src = ''; // Kosongkan src supaya video berhenti
+            container.style.display = 'none';
         }
 
         muatDrama();
