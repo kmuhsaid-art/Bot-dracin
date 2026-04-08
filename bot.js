@@ -63,7 +63,8 @@ bot.start((ctx) => {
 // FUNGSI SYNC AUTOMATIK (TMDB)
 bot.command('sync', async (ctx) => {
   try {
-    ctx.reply("⏳ Sedang menyedut drama trending dari TMDB...");
+    ctx.reply("⏳ Sedang menyedut drama trending & pautan video...");
+    
     const url = `https://api.themoviedb.org/3/trending/tv/week?api_key=${TMDB_KEY}`;
     const response = await axios.get(url);
     const dramas = response.data.results;
@@ -71,21 +72,27 @@ bot.command('sync', async (ctx) => {
     let count = 0;
     for (let item of dramas) {
       const wujud = await Film.findOne({ judul: item.name });
+      
       if (!wujud) {
+        // MENGGUNAKAN SERVER EMBED (Pilihan yang boleh dimainkan)
+        // vidsrc.to adalah server tontonan percuma yang menyokong ID TMDB
+        const videoLink = `https://vidsrc.to/embed/tv/${item.id}`;
+
         await new Film({
           judul: item.name,
           deskripsi: item.overview || "Drama trending minggu ini.",
-          link: "https://www.dropbox.com/s/sample/video.mp4?dl=1", // Link placeholder
+          link: videoLink, 
           thumb: `https://image.tmdb.org/t/p/w500${item.poster_path}`
         }).save();
         count++;
       }
     }
-    ctx.reply(`✅ Berjaya! ${count} drama trending ditambah.`);
+    ctx.reply(`✅ Berjaya! ${count} drama trending dengan link aktif ditambah.`);
   } catch (err) {
     ctx.reply(`❌ Ralat: ${err.message}`);
   }
 });
+
 
 // Fungsi Menambah Drama Manual
 bot.command('add', async (ctx) => {
