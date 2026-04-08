@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 
 // --- 1. SAMBUNGAN MONGODB ---
-mongoose.connect('mongodb://atlas-sql-69d5b16e4c4ebf0e46ed32f5-6heyz3.a.query.mongodb.net/dracinDB?ssl=true&authSource=admin', {
+mongoose.connect('mongodb+srv://Hahihu:<Blink182>@cluster0.i1btqnj.mongodb.net/?appName=Cluster0', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(() => console.log("✅ MongoDB Connected"))
