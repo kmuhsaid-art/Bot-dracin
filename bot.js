@@ -4,7 +4,9 @@ const cors = require('cors');
 const mongoose = require('mongoose'); 
 
 const app = express();
-app.use(cors());
+// Pastikan cors diletakkan SEBELUM app.get('/api/drama')
+app.use(cors()); 
+app.use(express.json()); // Tambah ini juga untuk keselamatan data
 
 // --- 1. SAMBUNGAN MONGODB ---
 mongoose.connect('mongodb+srv://Hahihu:Blink182@cluster0.i1btqnj.mongodb.net/dracinDB?retryWrites=true&w=majority', {
