@@ -6,12 +6,13 @@ const mongoose = require('mongoose');
 const app = express();
 app.use(cors());
 
-// --- 1. SAMBUNGAN MONGODB ---
-mongoose.connect('mongodb+srv://Hahihu:<Blink182>@cluster0.i1btqnj.mongodb.net/?appName=Cluster0', {
+// Gantikan 'KATA_LALUAN_ANDA' dengan password user 'Hahihu'
+mongoose.connect('mongodb+srv://Hahihu:Blink182@cluster0.xxxxx.mongodb.net/dracinDB?retryWrites=true&w=majority', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.log("❌ MongoDB Error:", err));
+
 
 // --- 2. DEFINISI MODEL ---
 const Film = mongoose.model('Film', {
