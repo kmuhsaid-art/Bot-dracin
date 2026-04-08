@@ -76,7 +76,7 @@ bot.command('sync', async (ctx) => {
       if (!wujud) {
         // MENGGUNAKAN SERVER EMBED (Pilihan yang boleh dimainkan)
         // vidsrc.to adalah server tontonan percuma yang menyokong ID TMDB
-        const videoLink = `https://vidsrc.to/embed/tv/${item.id}`;
+        const videoLink = `https://vidsrc.me/embed/tv/${item.id}`;
 
         await new Film({
           judul: item.name,
