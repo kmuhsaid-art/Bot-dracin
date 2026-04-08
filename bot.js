@@ -6,13 +6,12 @@ const mongoose = require('mongoose');
 const app = express();
 app.use(cors());
 
-// Gantikan 'KATA_LALUAN_ANDA' dengan password user 'Hahihu'
+// --- 1. SAMBUNGAN MONGODB ---
 mongoose.connect('mongodb+srv://Hahihu:Blink182@cluster0.i1btqnj.mongodb.net/dracinDB?retryWrites=true&w=majority', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.log("❌ MongoDB Error:", err));
-
 
 // --- 2. DEFINISI MODEL ---
 const Film = mongoose.model('Film', {
@@ -22,7 +21,7 @@ const Film = mongoose.model('Film', {
   thumb: String
 });
 
-const bot = new Telegraf('8700274040:AAE_-p7po7H4SY3Da3Ta4I6qkPKczA09m6I'); // Pastikan Token ini betul
+const bot = new Telegraf('8700274040:AAE_-p7po7H4SY3Da3Ta4I6qkPKczA09m6I');
 
 // --- 3. API UNTUK MINI APP ---
 app.get('/api/drama', async (req, res) => {
@@ -34,6 +33,8 @@ app.get('/api/drama', async (req, res) => {
   }
 });
 
+// --- 4. LOGIK BOT TELEGRAM ---
+
 // Paparan Utama (Start)
 bot.start((ctx) => {
   ctx.replyWithMarkdown(
@@ -44,8 +45,14 @@ bot.start((ctx) => {
     `1️⃣ Klik butang *🎬 Katalog Drama* di bawah.\n` +
     `2️⃣ Cari drama yang anda minat.\n` +
     `3️⃣ Atau guna fungsi carian: \`@${ctx.botInfo.username} [nama drama]\``,
-    
-// Fungsi untuk memaparkan pakej VIP apabila butang diklik
+    Markup.inlineKeyboard([
+      [Markup.button.webApp('🎬 Katalog Drama', 'https://kmuhsaid-art.github.io/Bot-dracin/')],
+      [Markup.button.callback('💎 Beli VIP', 'view_vip_packages')]
+    ])
+  );
+});
+
+// Fungsi untuk memaparkan pakej VIP
 bot.action('view_vip_packages', (ctx) => {
   const hargaVIP = 
     `🌟 *PAKEJ PREMIUM VIP* 🌟\n\n` +
@@ -57,8 +64,8 @@ bot.action('view_vip_packages', (ctx) => {
     `• 1 Bulan — RM25\n` +
     `• 3 Bulan — RM60\n` +
     `• 1 Tahun — RM250\n` +
-    `• *Selamanya — RM500* (Akses Seumur Hidup)\n\n` +
-    `📌 *Cara Langgan:* Klik butang "Hubungi Admin" di bawah dan hantar bukti pembayaran.`;
+    `• *Selamanya — RM500*\n\n` +
+    `📌 *Cara Langgan:* Klik butang "Hubungi Admin" di bawah.`;
 
   ctx.editMessageText(hargaVIP, {
     parse_mode: 'Markdown',
@@ -69,7 +76,7 @@ bot.action('view_vip_packages', (ctx) => {
   });
 });
 
-// Fungsi butang kembali ke menu utama
+// Fungsi butang kembali
 bot.action('back_to_start', (ctx) => {
   ctx.editMessageText(`👋 *Selamat Datang semula!*\n\nSila pilih menu di bawah:`, {
     parse_mode: 'Markdown',
@@ -80,16 +87,17 @@ bot.action('back_to_start', (ctx) => {
   });
 });
 
-// Fungsi Menambah Drama (/add judul | deskripsi | link | gambar)
+// Fungsi Menambah Drama
 bot.command('add', async (ctx) => {
   const text = ctx.message.text.split('/add ')[1];
   if (!text) return ctx.reply("❌ Format salah! Guna: /add Judul | Deskripsi | Link | LinkGambar");
 
-  const [judul, deskripsi, link, thumb] = text.split('|').map(item => item.trim());
-
-  if (!judul || !deskripsi || !link || !thumb) {
+  const parts = text.split('|').map(item => item.trim());
+  if (parts.length < 4) {
     return ctx.reply("❌ Maklumat tidak lengkap! Pastikan ada 4 bahagian dipisahkan dengan '|'");
   }
+
+  const [judul, deskripsi, link, thumb] = parts;
 
   try {
     const dramaBaru = new Film({ judul, deskripsi, link, thumb });
@@ -106,4 +114,6 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 API hidup di port ${PORT}`);
 });
 
-bot.launch();
+bot.launch().then(() => {
+  console.log("🤖 Bot sedang berjalan...");
+});
