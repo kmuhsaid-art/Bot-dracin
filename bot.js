@@ -35,28 +35,34 @@ app.get('/api/drama', async (req, res) => {
 
 // --- 4. LOGIK BOT TELEGRAM ---
 
-// Paparan Utama (Start)
+// Paparan Utama (Menu Grid)
 bot.start((ctx) => {
   ctx.replyWithMarkdown(
     `👋 *Selamat Datang ke @${ctx.botInfo.username}*\n\n` +
     `Katalog drama sedia untuk dilayan! Klik butang di bawah untuk mula menonton.\n\n` +
-    `Satu-satunya tempat untuk anda layan drama China & Korea kegemaran secara percuma!\n\n` +
     `📌 *CARA PENGGUNAAN:*\n` +
     `1️⃣ Klik butang *🎬 Katalog Drama* di bawah.\n` +
     `2️⃣ Cari drama yang anda minat.\n` +
     `3️⃣ Atau guna fungsi carian: \`@${ctx.botInfo.username} [nama drama]\``,
     Markup.inlineKeyboard([
       [Markup.button.webApp('🎬 Katalog Drama', 'https://kmuhsaid-art.github.io/Bot-dracin/')],
-      [Markup.button.callback('💎 Beli VIP', 'view_vip_packages')]
+      [
+        Markup.button.callback('💎 Beli VIP', 'view_vip_packages'),
+        Markup.button.callback('👤 Profil Saya', 'view_profile')
+      ],
+      [Markup.button.callback('📞 Bantuan', 'view_help')],
+      [
+        Markup.button.url('💸 Cari Cuan ↗️', 'https://t.me/m_asfanraza'),
+        Markup.button.url('🇲🇾 VIP Malaysia ↗️', 'https://t.me/m_asfanraza')
+      ]
     ])
   );
 });
 
-// Fungsi untuk memaparkan pakej VIP
+// FUNGSI PAKEJ VIP (Harga yang anda berikan)
 bot.action('view_vip_packages', (ctx) => {
   const hargaVIP = 
     `🌟 *PAKEJ PREMIUM VIP* 🌟\n\n` +
-    `Nikmati akses tanpa had kepada semua drama China & Korea terbaru!\n\n` +
     `🎟️ *PILIHAN PAKEJ:* \n` +
     `• 1 Hari — RM1\n` +
     `• 3 Hari — RM2\n` +
@@ -76,44 +82,52 @@ bot.action('view_vip_packages', (ctx) => {
   });
 });
 
-// Fungsi butang kembali
+// Fungsi Butang Kembali
 bot.action('back_to_start', (ctx) => {
-  ctx.editMessageText(`👋 *Selamat Datang semula!*\n\nSila pilih menu di bawah:`, {
+  ctx.editMessageText(`👋 Pilih menu utama di bawah:`, {
     parse_mode: 'Markdown',
     ...Markup.inlineKeyboard([
       [Markup.button.webApp('🎬 Katalog Drama', 'https://kmuhsaid-art.github.io/Bot-dracin/')],
-      [Markup.button.callback('💎 Beli VIP', 'view_vip_packages')]
+      [
+        Markup.button.callback('👑 Beli VIP', 'view_vip_packages'),
+        Markup.button.callback('👤 Profil Saya', 'view_profile')
+      ],
+      [Markup.button.callback('📞 Bantuan', 'view_help')],
+      [
+        Markup.button.url('💸 Cari Cuan ↗️', 'https://t.me/m_asfanraza'),
+        Markup.button.url('🇲🇾 VIP Malaysia ↗️', 'https://t.me/m_asfanraza')
+      ]
     ])
+  });
+});
+
+// Tambahan Fungsi Profil & Bantuan
+bot.action('view_profile', (ctx) => {
+  ctx.editMessageText(`👤 *PROFIL PENGGUNA*\n\n• ID: \`${ctx.from.id}\`\n• Status: 🆓 Percuma`, {
+    parse_mode: 'Markdown',
+    ...Markup.inlineKeyboard([[Markup.button.callback('⬅️ Kembali', 'back_to_start')]])
+  });
+});
+
+bot.action('view_help', (ctx) => {
+  ctx.editMessageText(`📞 *BANTUAN*\n\nAda masalah? Hubungi admin di @m_asfanraza`, {
+    parse_mode: 'Markdown',
+    ...Markup.inlineKeyboard([[Markup.button.callback('⬅️ Kembali', 'back_to_start')]])
   });
 });
 
 // Fungsi Menambah Drama
 bot.command('add', async (ctx) => {
   const text = ctx.message.text.split('/add ')[1];
-  if (!text) return ctx.reply("❌ Format salah! Guna: /add Judul | Deskripsi | Link | LinkGambar");
-
-  const parts = text.split('|').map(item => item.trim());
-  if (parts.length < 4) {
-    return ctx.reply("❌ Maklumat tidak lengkap! Pastikan ada 4 bahagian dipisahkan dengan '|'");
-  }
-
-  const [judul, deskripsi, link, thumb] = parts;
-
+  if (!text) return ctx.reply("❌ Guna: /add Judul | Deskripsi | Link | Gambar");
+  const [judul, deskripsi, link, thumb] = text.split('|').map(item => item.trim());
   try {
-    const dramaBaru = new Film({ judul, deskripsi, link, thumb });
-    await dramaBaru.save();
+    await new Film({ judul, deskripsi, link, thumb }).save();
     ctx.reply(`✅ Berjaya menambah: ${judul}`);
-  } catch (err) {
-    ctx.reply("❌ Gagal menyimpan data ke MongoDB.");
-  }
+  } catch (err) { ctx.reply("❌ Gagal simpan ke MongoDB."); }
 });
 
-// --- 5. SETUP SERVER & PORT ---
+// --- 5. SETUP SERVER ---
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 API hidup di port ${PORT}`);
-});
-
-bot.launch().then(() => {
-  console.log("🤖 Bot sedang berjalan...");
-});
+app.listen(PORT, '0.0.0.0', () => console.log(`🚀 API di port ${PORT}`));
+bot.launch();
