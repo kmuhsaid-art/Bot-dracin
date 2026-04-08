@@ -1,101 +1,40 @@
-<!DOCTYPE html>
-<html lang="ms">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Katalog Drama</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1a1a1a;
-            color: white;
-            margin: 0;
-            padding: 15px;
-        }
-        h2 { text-align: center; color: #f39c12; }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-        .card {
-            background: #2c3e50;
-            border-radius: 10px;
-            overflow: hidden;
-            text-align: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-        .card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            background-color: #34495e; /* Warna sementara jika gambar loading */
-        }
-        .card-info { padding: 10px; }
-        .card-title { font-size: 14px; font-weight: bold; margin-bottom: 8px; height: 40px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-        .btn-watch {
-            background-color: #27ae60;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-            text-decoration: none;
-            display: inline-block;
-            box-sizing: border-box;
-        }
-        .loading { text-align: center; margin-top: 50px; color: #f39c12; }
-    </style>
-</head>
-<body>
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
 
-    <h2>🎬 KATALOG DRAMA</h2>
+    // Pastikan URL ini tepat seperti di dashboard Render anda
+    const API_URL = 'https://bot-dracin.onrender.com/api/drama';
 
-    <div id="loading" class="loading">Memuatkan drama...</div>
-    <div class="grid" id="katalog"></div>
+    async function muatDrama() {
+        try {
+            const response = await fetch(API_URL);
+            const dramas = await response.json();
+            
+            const katalogDiv = document.getElementById('katalog');
+            katalogDiv.innerHTML = ''; // Memadamkan kotak "Akan Datang" tadi
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
-// Ganti baris ini dalam index.html anda
-const API_URL = 'https://bot-dracin.onrender.com/api/drama';
-
-
-        async function muatDrama() {
-            try {
-                const response = await fetch(API_URL);
-                const dramas = await response.json();
-                
-                const katalogDiv = document.getElementById('katalog');
-                const loadingDiv = document.getElementById('loading');
-                
-                loadingDiv.style.display = 'none'; // Sembunyikan loading
-                katalogDiv.innerHTML = ''; // Kosongkan placeholder
-
-                dramas.forEach(drama => {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <img src="${drama.thumb}" alt="${drama.judul}" onerror="this.src='https://via.placeholder.com/200x300?text=Tiada+Gambar'">
-                        <div class="card-info">
-                            <div class="card-title">${drama.judul}</div>
-                            <a href="${drama.link}" class="btn-watch">Tonton Sekarang</a>
-                        </div>
-                    `;
-                    katalogDiv.appendChild(card);
-                });
-            } catch (err) {
-                console.error("Ralat ambil data:", err);
-                document.getElementById('loading').innerText = "Gagal memuatkan data. Sila cuba lagi.";
+            if (dramas.length === 0) {
+                katalogDiv.innerHTML = '<p style="text-align:center; width:100%;">Tiada drama dijumpai.</p>';
+                return;
             }
-        }
 
-        // Jalankan fungsi apabila halaman dibuka
-        muatDrama();
-    </script>
-</body>
-</html>
+            dramas.forEach(drama => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <img src="${drama.thumb}" alt="${drama.judul}" onerror="this.src='https://via.placeholder.com/200x300?text=Tiada+Poster'">
+                    <div class="card-info">
+                        <div class="card-title">${drama.judul}</div>
+                        <a href="${drama.link}" class="btn-watch">Tonton Sekarang</a>
+                    </div>
+                `;
+                katalogDiv.appendChild(card);
+            });
+        } catch (err) {
+            console.error("Ralat:", err);
+            document.getElementById('katalog').innerHTML = '<p style="text-align:center; width:100%;">Gagal memuatkan katalog.</p>';
+        }
+    }
+
+    muatDrama();
+</script>
