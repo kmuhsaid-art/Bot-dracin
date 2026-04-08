@@ -69,9 +69,13 @@ bot.command('sync', async (ctx) => {
     const response = await axios.get(url);
     const dramas = response.data.results;
 
-    if (!dramas || dramas.length === 0) {
-      return ctx.reply("❌ Gagal mengambil data dari TMDB.");
-    }
+    if (!wujud) { 
+   // ... kod simpan baru ...
+} else {
+   // Tambah ini untuk paksa kemaskini pautan video yang lama
+   wujud.link = `https://embed.su/embed/tv/${item.id}`;
+   await wujud.save();
+}
 
     let count = 0;
     for (let item of dramas) {
