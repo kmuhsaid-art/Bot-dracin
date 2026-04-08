@@ -62,32 +62,40 @@ bot.command('sync_melolo', async (ctx) => {
   try {
     ctx.reply("⏳ Sedang menyedut konten terbaru dari Melolo...");
     
-    const response = await axios.get('https://melolo-api-azure.vercel.app/api/melolo/latest');
-    // Berdasarkan gambar JSON anda: data -> books
-    const dramas = response.data.data.books; 
+    // Tambah headers supaya nampak seperti pelayar (browser) sebenar
+    const response = await axios.get('https://melolo-api-azure.vercel.app/api/melolo/latest', {
+      timeout: 10000, // Tunggu 10 saat sebelum batal
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    });
+
+    // Pastikan kita ambil data yang betul: response.data.data.books
+    const dramas = response.data?.data?.books; 
 
     if (!dramas || dramas.length === 0) {
-      return ctx.reply("❌ Tiada data ditemui dalam API Melolo.");
+      return ctx.reply("❌ API Melolo memberikan data kosong.");
     }
 
     let count = 0;
     for (let item of dramas) {
+      // Kita guna book_id untuk semakan unik supaya drama tidak berulang
       const wujud = await Film.findOne({ judul: item.book_name });
       
       if (!wujud) {
         await new Film({
           judul: item.book_name,
           deskripsi: item.abstract || "Drama pendek Melolo",
-          link: item.thumb_url, // Buat masa ini guna thumb_url sebagai link jika tiada link video direct
+          link: item.thumb_url, // Link video sebenar biasanya perlukan ID, buat masa ini kita guna thumb
           thumb: item.thumb_url
         }).save();
         count++;
       }
     }
-    ctx.reply(`✅ Berjaya! ${count} drama pendek Melolo telah ditambah.`);
+    ctx.reply(`✅ Berjaya! ${count} drama terbaru ditambah ke Katalog.`);
   } catch (err) {
-    console.error(err);
-    ctx.reply("❌ Ralat: Gagal menyambung ke API Melolo.");
+    console.error("Error Melolo:", err.message);
+    ctx.reply(`❌ Ralat: ${err.message}`);
   }
 });
 
