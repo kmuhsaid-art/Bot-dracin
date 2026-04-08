@@ -60,44 +60,46 @@ bot.start((ctx) => {
 // --- FUNGSI SYNC MELOLO (GABUNGAN BARU) ---
 bot.command('sync_melolo', async (ctx) => {
   try {
-    ctx.reply("⏳ Sedang menyedut konten terbaru dari Melolo...");
+    ctx.reply("⏳ Sedang mencuba pautan alternatif Melolo...");
     
-    // Tambah headers supaya nampak seperti pelayar (browser) sebenar
-    const response = await axios.get('https://melolo-api-azure.vercel.app/api/melolo/latest', {
-      timeout: 10000, // Tunggu 10 saat sebelum batal
+    // Kita gunakan endpoint 'search' dengan kata kunci 'Drama' untuk pastikan ada data keluar
+    const response = await axios.get('https://melolo-api-azure.vercel.app/api/melolo/search?query=Drama', {
+      timeout: 15000,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0'
       }
     });
 
-    // Pastikan kita ambil data yang betul: response.data.data.books
-    const dramas = response.data?.data?.books; 
+    // Kita cuba cari data dalam 'results' atau 'data.books'
+    const dramas = response.data?.results || response.data?.data?.books; 
 
     if (!dramas || dramas.length === 0) {
-      return ctx.reply("❌ API Melolo memberikan data kosong.");
+      return ctx.reply("❌ Server Melolo masih membalas dengan data kosong. Mungkin server sedang diselenggara.");
     }
 
     let count = 0;
     for (let item of dramas) {
-      // Kita guna book_id untuk semakan unik supaya drama tidak berulang
-      const wujud = await Film.findOne({ judul: item.book_name });
+      const tajuk = item.title || item.book_name;
+      const gambar = item.thumb_url || item.cover || item.poster;
       
-      if (!wujud) {
+      const wujud = await Film.findOne({ judul: tajuk });
+      
+      if (!wujud && tajuk) {
         await new Film({
-          judul: item.book_name,
-          deskripsi: item.abstract || "Drama pendek Melolo",
-          link: item.thumb_url, // Link video sebenar biasanya perlukan ID, buat masa ini kita guna thumb
-          thumb: item.thumb_url
+          judul: tajuk,
+          deskripsi: item.abstract || "Drama pendek menarik dari Melolo",
+          link: gambar, // Buat masa ini kita guna gambar sebagai link tontonan sementara
+          thumb: gambar
         }).save();
         count++;
       }
     }
-    ctx.reply(`✅ Berjaya! ${count} drama terbaru ditambah ke Katalog.`);
+    ctx.reply(`✅ Berjaya! ${count} drama telah ditarik masuk ke Katalog.`);
   } catch (err) {
-    console.error("Error Melolo:", err.message);
     ctx.reply(`❌ Ralat: ${err.message}`);
   }
 });
+
 
 // Fungsi Menambah Drama Manual
 bot.command('add', async (ctx) => {
