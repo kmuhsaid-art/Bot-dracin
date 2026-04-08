@@ -44,11 +44,40 @@ bot.start((ctx) => {
     `1️⃣ Klik butang *🎬 Katalog Drama* di bawah.\n` +
     `2️⃣ Cari drama yang anda minat.\n` +
     `3️⃣ Atau guna fungsi carian: \`@${ctx.botInfo.username} [nama drama]\``,
-     
-    Markup.inlineKeyboard([
-      [Markup.button.webApp('🎬 Katalog Drama', 'https://kmuhsaid-art.github.io/Bot-dracin/')]
+    
+// Fungsi untuk memaparkan pakej VIP apabila butang diklik
+bot.action('view_vip_packages', (ctx) => {
+  const hargaVIP = 
+    `🌟 *PAKEJ PREMIUM VIP* 🌟\n\n` +
+    `Nikmati akses tanpa had kepada semua drama China & Korea terbaru!\n\n` +
+    `🎟️ *PILIHAN PAKEJ:* \n` +
+    `• 1 Hari — RM1\n` +
+    `• 3 Hari — RM2\n` +
+    `• 1 Minggu — RM5\n` +
+    `• 1 Bulan — RM25\n` +
+    `• 3 Bulan — RM60\n` +
+    `• 1 Tahun — RM250\n` +
+    `• *Selamanya — RM500* (Akses Seumur Hidup)\n\n` +
+    `📌 *Cara Langgan:* Klik butang "Hubungi Admin" di bawah dan hantar bukti pembayaran.`;
+
+  ctx.editMessageText(hargaVIP, {
+    parse_mode: 'Markdown',
+    ...Markup.inlineKeyboard([
+      [Markup.button.url('👨‍💻 Hubungi Admin (Bayar)', 'https://t.me/m_asfanraza')],
+      [Markup.button.callback('⬅️ Kembali', 'back_to_start')]
     ])
-  );
+  });
+});
+
+// Fungsi butang kembali ke menu utama
+bot.action('back_to_start', (ctx) => {
+  ctx.editMessageText(`👋 *Selamat Datang semula!*\n\nSila pilih menu di bawah:`, {
+    parse_mode: 'Markdown',
+    ...Markup.inlineKeyboard([
+      [Markup.button.webApp('🎬 Katalog Drama', 'https://kmuhsaid-art.github.io/Bot-dracin/')],
+      [Markup.button.callback('💎 Beli VIP', 'view_vip_packages')]
+    ])
+  });
 });
 
 // Fungsi Menambah Drama (/add judul | deskripsi | link | gambar)
