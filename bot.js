@@ -60,23 +60,26 @@ bot.start((ctx) => {
   );
 });
 
-// FUNGSI SYNC AUTOMATIK (TMDB)
+// --- FUNGSI SYNC AUTOMATIK (TELAH DIBAIKI) ---
 bot.command('sync', async (ctx) => {
   try {
-    ctx.reply("⏳ Sedang menyedut drama trending & pautan video...");
+    ctx.reply("⏳ Sedang menyedut drama trending & pautan video aktif...");
     
     const url = `https://api.themoviedb.org/3/trending/tv/week?api_key=${TMDB_KEY}`;
     const response = await axios.get(url);
     const dramas = response.data.results;
+
+    if (!dramas || dramas.length === 0) {
+      return ctx.reply("❌ Gagal mengambil data dari TMDB.");
+    }
 
     let count = 0;
     for (let item of dramas) {
       const wujud = await Film.findOne({ judul: item.name });
       
       if (!wujud) {
-        // MENGGUNAKAN SERVER EMBED (Pilihan yang boleh dimainkan)
-        // vidsrc.to adalah server tontonan percuma yang menyokong ID TMDB
-        const videoLink = `https://vidsrc.me/embed/tv/${item.id}`;
+        // Menggunakan server embed.su yang lebih stabil untuk peranti mudah alih
+        const videoLink = `https://embed.su/embed/tv/${item.id}`;
 
         await new Film({
           judul: item.name,
@@ -87,12 +90,12 @@ bot.command('sync', async (ctx) => {
         count++;
       }
     }
-    ctx.reply(`✅ Berjaya! ${count} drama trending dengan link aktif ditambah.`);
+    ctx.reply(`✅ Berjaya! ${count} drama trending dengan link aktif ditambah ke katalog.`);
   } catch (err) {
+    console.error(err);
     ctx.reply(`❌ Ralat: ${err.message}`);
   }
 });
-
 
 // Fungsi Menambah Drama Manual
 bot.command('add', async (ctx) => {
@@ -116,14 +119,6 @@ bot.action('view_vip_packages', (ctx) => {
   });
 });
 
-// Butang Kembali
-bot.action('back_to_start', (ctx) => {
-  ctx.editMessageText(`👋 Pilih menu utama di bawah:`, Markup.inlineKeyboard([
-    [Markup.button.webApp('🎬 Katalog Drama', 'https://kmuhsaid-art.github.io/Bot-dracin/')],
-    [Markup.button.callback('⬅️ Kembali', 'back_to_start')]
-  ]));
-});
-
 // Profil & Bantuan
 bot.action('view_profile', (ctx) => {
   ctx.editMessageText(`👤 *PROFIL PENGGUNA*\n\n• ID: \`${ctx.from.id}\`\n• Status: 🆓 Percuma`, {
@@ -136,6 +131,17 @@ bot.action('view_help', (ctx) => {
   ctx.editMessageText(`📞 *BANTUAN*\n\nAda masalah? Hubungi admin di @m_asfanraza`, {
     parse_mode: 'Markdown',
     ...Markup.inlineKeyboard([[Markup.button.callback('⬅️ Kembali', 'back_to_start')]])
+  });
+});
+
+// Butang Kembali
+bot.action('back_to_start', (ctx) => {
+  ctx.editMessageText(`👋 Pilih menu utama di bawah:`, {
+    parse_mode: 'Markdown',
+    ...Markup.inlineKeyboard([
+      [Markup.button.webApp('🎬 Katalog Drama', 'https://kmuhsaid-art.github.io/Bot-dracin/')],
+      [Markup.button.callback('⬅️ Kembali ke Mula', 'back_to_start')]
+    ])
   });
 });
 
