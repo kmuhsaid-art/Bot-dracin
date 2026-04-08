@@ -1,20 +1,37 @@
 <script>
+    // 1. Inisialisasi Telegram WebApp
     const tg = window.Telegram.WebApp;
-    tg.expand();
+    
+    // Pastikan kod berjalan hanya selepas dokumen sedia
+    window.addEventListener('DOMContentLoaded', () => {
+        tg.expand();
+        muatDrama();
+    });
 
-    // Pastikan URL ini tepat seperti di dashboard Render anda
+    // URL API Render anda
     const API_URL = 'https://bot-dracin.onrender.com/api/drama';
 
     async function muatDrama() {
+        const katalogDiv = document.getElementById('katalog');
+        
+        // Safety check: Pastikan elemen 'katalog' wujud dalam HTML
+        if (!katalogDiv) {
+            console.error("Elemen 'katalog' tidak dijumpai dalam HTML!");
+            return;
+        }
+
         try {
-            const response = await fetch(API_URL);
+            // Tambah timeout atau timestamp untuk elakkan cache browser
+            const response = await fetch(`${API_URL}?t=${new Date().getTime()}`);
+            
+            if (!response.ok) throw new Error("Respon server gagal");
+            
             const dramas = await response.json();
             
-            const katalogDiv = document.getElementById('katalog');
-            katalogDiv.innerHTML = ''; // Memadamkan kotak "Akan Datang" tadi
+            katalogDiv.innerHTML = ''; // Kosongkan placeholder
 
-            if (dramas.length === 0) {
-                katalogDiv.innerHTML = '<p style="text-align:center; width:100%;">Tiada drama dijumpai.</p>';
+            if (!dramas || dramas.length === 0) {
+                katalogDiv.innerHTML = '<p style="text-align:center; width:100%; color:#f39c12;">Belum ada drama dalam database.</p>';
                 return;
             }
 
@@ -22,7 +39,8 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                    <img src="${drama.thumb}" alt="${drama.judul}" onerror="this.src='https://via.placeholder.com/200x300?text=Tiada+Poster'">
+                    <img src="${drama.thumb}" alt="${drama.judul}" 
+                         onerror="this.onerror=null; this.src='https://via.placeholder.com/200x300?text=Poster+Error'">
                     <div class="card-info">
                         <div class="card-title">${drama.judul}</div>
                         <a href="${drama.link}" class="btn-watch">Tonton Sekarang</a>
@@ -30,11 +48,15 @@
                 `;
                 katalogDiv.appendChild(card);
             });
+            
         } catch (err) {
-            console.error("Ralat:", err);
-            document.getElementById('katalog').innerHTML = '<p style="text-align:center; width:100%;">Gagal memuatkan katalog.</p>';
+            console.error("Ralat Fetch:", err);
+            katalogDiv.innerHTML = `
+                <div style="text-align:center; width:100%; padding:20px;">
+                    <p style="color:#e74c3c;">⚠️ Gagal menyambung ke server.</p>
+                    <small style="color:#999;">Pastikan bot di Render sedang 'Live'</small>
+                </div>
+            `;
         }
     }
-
-    muatDrama();
 </script>
