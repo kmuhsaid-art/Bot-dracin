@@ -3,63 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Melolo Premium</title>
+    <title>Pecinta Drama</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f0f0f; color: white; margin: 0; padding-bottom: 70px; }
-        .header { padding: 20px; text-align: center; background: linear-gradient(180deg, #f39c12 0%, #0f0f0f 100%); }
+        body { font-family: sans-serif; background-color: #0f0f0f; color: white; margin: 0; padding-bottom: 80px; overflow-x: hidden; }
+        .header { padding: 15px; text-align: center; background: linear-gradient(180deg, #f39c12 0%, #0f0f0f 100%); font-weight: bold; border-bottom: 1px solid #333; }
         
         /* Grid Drama */
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 15px; }
-        .card { background: #1a1a1a; border-radius: 10px; overflow: hidden; position: relative; border: 1px solid #222; }
-        .card img { width: 100%; height: 230px; object-fit: cover; }
-        .card-info { padding: 8px; font-size: 12px; font-weight: bold; text-align: center; }
-        .btn-play { background: #f39c12; color: black; padding: 8px; text-align: center; cursor: pointer; font-size: 11px; font-weight: 800; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
+        .card { background: #1a1a1a; border-radius: 8px; overflow: hidden; border: 1px solid #222; display: flex; flex-direction: column; }
+        .card img { width: 100%; height: 200px; object-fit: cover; }
+        .card-info { padding: 8px; font-size: 12px; text-align: center; height: 35px; overflow: hidden; }
+        .btn-play { background: #f39c12; color: black; padding: 10px; text-align: center; cursor: pointer; font-size: 11px; font-weight: bold; margin: 5px; border-radius: 5px; }
 
         /* Navigasi Bawah */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #161616; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #333; z-index: 100; }
-        .nav-item { color: #888; text-align: center; font-size: 10px; flex: 1; text-decoration: none; }
-        .nav-item i { font-size: 20px; display: block; margin-bottom: 4px; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #111; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #333; z-index: 100; }
+        .nav-item { color: #666; text-align: center; font-size: 10px; flex: 1; text-decoration: none; border: none; background: none; }
+        .nav-item i { font-size: 18px; display: block; margin-bottom: 4px; }
         .nav-item.active { color: #f39c12; }
 
-        /* Video Container */
-        #videoContainer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 1000; }
-        .close-btn { position: absolute; top: 10px; right: 10px; background: rgba(231, 76, 60, 0.8); color: white; border: none; padding: 10px; border-radius: 5px; z-index: 1001; }
+        /* Fullscreen Video Overlay */
+        #videoContainer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 9999; }
+        .close-btn { position: absolute; top: 20px; right: 20px; background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 5px; z-index: 10000; font-weight: bold; }
 
-        /* Sections */
-        .section { display: none; padding: 20px; }
+        /* Section Settings */
+        .section { display: none; padding: 15px; animation: fadeIn 0.3s; }
         .active-section { display: block; }
-        .vip-card { background: linear-gradient(45deg, #f39c12, #f1c40f); color: black; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .vip-box { background: #222; border: 2px solid #f39c12; padding: 20px; border-radius: 10px; text-align: center; margin-top: 20px; }
     </style>
 </head>
 <body>
 
     <div id="sec-katalog" class="section active-section">
-        <div class="header"><h2>🎬 KATALOG DRAMA</h2></div>
+        <div class="header">🎬 KATALOG DRAMA</div>
         <div id="katalog" class="grid"></div>
     </div>
 
     <div id="sec-vip" class="section">
-        <div class="header"><h2>💎 VIP MEMBERSHIP</h2></div>
-        <div class="vip-card">
+        <div class="header">💎 VIP MEMBERSHIP</div>
+        <div class="vip-box">
             <h3>PREMIUM PASS</h3>
-            <p>Tonton semua drama tanpa iklan & akses awal!</p>
-            <button onclick="Telegram.WebApp.showAlert('Sila hubungi Admin untuk pembayaran.')" style="padding:10px 20px; border-radius:20px; border:none; background:black; color:white; font-weight:bold;">BELI SEKARANG</button>
+            <p style="color: #aaa;">Tonton semua drama tanpa iklan & akses lebih awal.</p>
+            <button onclick="Telegram.WebApp.openTelegramLink('https://t.me/m_asfanraza')" style="background:#f39c12; border:none; padding:10px 20px; border-radius:20px; font-weight:bold;">BELI SEKARANG</button>
         </div>
     </div>
 
     <div id="sec-cuan" class="section">
-        <div class="header"><h2>💰 CARI CUAN</h2></div>
-        <div style="text-align:center;">
-            <p>Sertai rangkaian <b>Flux Market</b> untuk jana pendapatan harian melalui trading dan pelaburan.</p>
-            <button onclick="window.location.href='https://t.me/your_link'" style="background:#27ae60; color:white; padding:15px; border-radius:10px; border:none; width:100%;">MULA JANA PENDAPATAN</button>
+        <div class="header">💰 CARI CUAN</div>
+        <div style="text-align:center; margin-top:30px;">
+            <p>Sertai rangkaian <b>Flux Market</b> untuk jana pendapatan harian.</p>
+            <button onclick="Telegram.WebApp.openTelegramLink('https://t.me/m_asfanraza')" style="background:#27ae60; color:white; padding:15px; border-radius:10px; border:none; width:90%; font-weight:bold;">MULA JANA PENDAPATAN</button>
         </div>
     </div>
 
     <div id="sec-profil" class="section">
-        <div class="header"><h2>👤 PROFIL SAYA</h2></div>
-        <div id="userInfo" style="text-align:center; padding:20px;"></div>
+        <div class="header">👤 PROFIL SAYA</div>
+        <div id="userInfo" style="text-align:center; padding:30px;"></div>
     </div>
 
     <div id="videoContainer">
@@ -68,10 +70,10 @@
     </div>
 
     <nav class="bottom-nav">
-        <a href="#" class="nav-item active" onclick="showSec('sec-katalog', this)"><i class="fas fa-film"></i>Katalog</a>
-        <a href="#" class="nav-item" onclick="showSec('sec-vip', this)"><i class="fas fa-gem"></i>VIP</a>
-        <a href="#" class="nav-item" onclick="showSec('sec-cuan', this)"><i class="fas fa-dollar-sign"></i>Cari Cuan</a>
-        <a href="#" class="nav-item" onclick="showSec('sec-profil', this)"><i class="fas fa-user"></i>Profil</a>
+        <button class="nav-item active" onclick="showSec('sec-katalog', this)"><i class="fas fa-film"></i>Katalog</button>
+        <button class="nav-item" onclick="showSec('sec-vip', this)"><i class="fas fa-gem"></i>VIP</button>
+        <button class="nav-item" onclick="showSec('sec-cuan', this)"><i class="fas fa-dollar-sign"></i>Cuan</button>
+        <button class="nav-item" onclick="showSec('sec-profil', this)"><i class="fas fa-user"></i>Profil</button>
     </nav>
 
     <script>
@@ -79,11 +81,12 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Tunjuk Profil User Telegram
+        // Setup Profil
+        const user = tg.initDataUnsafe?.user;
         document.getElementById('userInfo').innerHTML = `
-            <img src="https://ui-avatars.com/api/?name=${tg.initDataUnsafe.user?.first_name}&background=f39c12&color=fff" style="border-radius:50%; width:80px;"><br>
-            <h3>${tg.initDataUnsafe.user?.first_name || 'Pengguna'}</h3>
-            <p>Status: Free Member</p>
+            <img src="https://ui-avatars.com/api/?name=${user?.first_name || 'User'}&background=f39c12&color=fff" style="border-radius:50%; width:100px; border:3px solid #f39c12;"><br>
+            <h2>${user?.first_name || 'Pengguna'}</h2>
+            <p style="color:#f39c12">Status: Free Member</p>
         `;
 
         function showSec(id, el) {
@@ -99,25 +102,26 @@
                 const dramas = await res.json();
                 const katalogDiv = document.getElementById('katalog');
                 katalogDiv.innerHTML = '';
-                dramas.forEach(drama => {
+                dramas.reverse().forEach(drama => {
                     const card = document.createElement('div');
                     card.className = 'card';
                     card.innerHTML = `
-                        <img src="${drama.thumb}" onerror="this.src='https://via.placeholder.com/200x300'">
+                        <img src="${drama.thumb}" onerror="this.src='https://via.placeholder.com/200x300?text=No+Image'">
                         <div class="card-info">${drama.judul}</div>
                         <div class="btn-play" onclick="bukaVideo('${drama.link}')">▶️ TONTON</div>
                     `;
                     katalogDiv.appendChild(card);
                 });
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Gagal muat data"); }
         }
 
         function bukaVideo(url) {
             const container = document.getElementById('videoContainer');
             const playerArea = document.getElementById('playerArea');
-            const secureUrl = url.replace('http://', 'https://');
-            playerArea.innerHTML = `<iframe src="${secureUrl}" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>`;
+            // Menambah parameter sandboxing supaya player website luaran boleh berfungsi
+            playerArea.innerHTML = `<iframe src="${url}" style="width:100%; height:100%; border:none;" allowfullscreen sandbox="allow-forms allow-scripts allow-same-origin"></iframe>`;
             container.style.display = 'block';
+            tg.HapticFeedback.impactOccurred('medium');
         }
 
         function tutupVideo() {
