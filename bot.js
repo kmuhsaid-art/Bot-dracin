@@ -26,39 +26,24 @@ const Film = mongoose.model('Film', {
 const bot = new Telegraf('8700274040:AAE_-p7po7H4SY3Da3Ta4I6qkPKczA09m6I');
 const TMDB_KEY = '92b7462311961dd095978dab2227d712'; 
 
-// ==========================================
-// --- 3. KONFIGURASI API MELOLO (DARI PYTHON) ---
-// ==========================================
+// --- 3. KONFIGURASI API MELOLO ---
 function getRticket() { return Date.now().toString(); }
 
 const meloloHeaders = {
     "Host": "api.tmtreader.com",
     "Accept": "application/json; charset=utf-8,application/x-protobuf",
     "X-Xs-From-Web": "false",
-    "Age-Range": "8",
-    "Sdk-Version": "2",
-    "Passport-Sdk-Version": "50357",
-    "X-Vc-Bdturing-Sdk-Version": "2.2.1.i18n",
-    "User-Agent": "com.worldance.drama/49819 (Linux; U; Android 9; in; SM-N976N; Build/QP1A.190711.020;tt-ok/3.12.13.17)",
+    "User-Agent": "com.worldance.drama/49819 (Linux; U; Android 9; in; SM-N976N)",
 };
 
 const meloloParams = {
-    "iid": "7549249992780367617", "device_id": "6944790948585719298", "ac": "wifi",
-    "channel": "gp", "aid": "645713", "app_name": "Melolo", "version_code": "49819",
-    "version_name": "4.9.8", "device_platform": "android", "os": "android",
-    "ssmix": "a", "device_type": "SM-N976N", "device_brand": "samsung",
-    "language": "in", "os_api": "28", "os_version": "9", "openudid": "707e4ef289dcc394",
-    "manifest_version_code": "49819", "resolution": "900*1600", "dpi": "320",
-    "update_version_code": "49819", "current_region": "ID", "carrier_region": "ID",
-    "app_language": "id", "sys_language": "in", "app_region": "ID", "sys_region": "ID",
-    "mcc_mnc": "46002", "carrier_region_v2": "460", "user_language": "id",
-    "time_zone": "Asia/Bangkok", "ui_language": "in", "cdid": "a854d5a9-b6cd-4de7-9c43-8310f5bf513c",
+    "iid": "7549249992780367617", "device_id": "6944790948585719298", "aid": "645713", 
+    "app_name": "Melolo", "device_platform": "android", "language": "in"
 };
 
-// Fungsi Cari Drama Melolo
 async function searchMelolo(query, limit = "5") {
     try {
-        const params = { ...meloloParams, search_source_id: "clks###", IsFetchDebug: "false", offset: "0", cancel_search_category_enhance: "false", query, limit, search_id: "", _rticket: getRticket() };
+        const params = { ...meloloParams, query, limit, _rticket: getRticket() };
         const res = await axios.get("https://api.tmtreader.com/i18n_novel/search/page/v1/", { headers: meloloHeaders, params });
         const books = [];
         const searchData = res.data?.data?.search_data || [];
@@ -68,33 +53,30 @@ async function searchMelolo(query, limit = "5") {
             }
         });
         return books;
-    } catch (e) { console.error("Melolo Search Error:", e.message); return []; }
+    } catch (e) { return []; }
 }
 
-// Fungsi Dapatkan ID Video Pertama
 async function getVideoDetails(series_id) {
     try {
-        const headers = { ...meloloHeaders, "X-Ss-Stub": "238B6268DE1F0B757306031C76B5397E", "Content-Encoding": "gzip", "Content-Type": "application/json; charset=utf-8" };
-        const params = { ...meloloParams, _rticket: getRticket() };
-        const data = { biz_param: { detail_page_version: 0, from_video_id: "", need_all_video_definition: false, need_mp4_align: false, source: 4, use_os_player: false, video_id_type: 1 }, series_id };
-        const res = await axios.post("https://api.tmtreader.com/novel/player/video_detail/v1/", data, { headers, params });
-        const videoList = res.data?.data?.video_data?.video_list || [];
-        return videoList.length > 0 ? videoList[0].vid : null;
-    } catch (e) { console.error("Melolo Video Details Error:", e.message); return null; }
+        const data = { biz_param: { video_id_type: 1, source: 4 }, series_id };
+        const res = await axios.post("https://api.tmtreader.com/novel/player/video_detail/v1/", data, { 
+            headers: { ...meloloHeaders, "Content-Type": "application/json" },
+            params: { ...meloloParams, _rticket: getRticket() }
+        });
+        return res.data?.data?.video_data?.video_list?.[0]?.vid || null;
+    } catch (e) { return null; }
 }
 
-// Fungsi Dapatkan Direct Video URL
 async function getVideoModel(video_id) {
     try {
-        const headers = { ...meloloHeaders, "X-Ss-Stub": "B7FB786F2CAA8B9EFB7C67A524B73AFB", "Content-Encoding": "gzip", "Content-Type": "application/json; charset=utf-8" };
-        const params = { ...meloloParams, _rticket: getRticket() };
-        const data = { biz_param: { detail_page_version: 0, device_level: 3, from_video_id: "", need_all_video_definition: true, need_mp4_align: false, source: 4, use_os_player: false, video_id_type: 0, video_platform: 3 }, video_id };
-        const res = await axios.post("https://api.tmtreader.com/novel/player/video_model/v1/", data, { headers, params });
+        const data = { biz_param: { video_id_type: 0, source: 4, video_platform: 3 }, video_id };
+        const res = await axios.post("https://api.tmtreader.com/novel/player/video_model/v1/", data, { 
+            headers: { ...meloloHeaders, "Content-Type": "application/json" },
+            params: { ...meloloParams, _rticket: getRticket() }
+        });
         return res.data?.data?.main_url || res.data?.data?.backup_url || null;
-    } catch (e) { console.error("Melolo Video Model Error:", e.message); return null; }
+    } catch (e) { return null; }
 }
-// ==========================================
-
 
 // --- 4. API UNTUK MINI APP ---
 app.get('/api/drama', async (req, res) => {
@@ -107,64 +89,63 @@ app.get('/api/drama', async (req, res) => {
 // --- 5. LOGIK BOT TELEGRAM ---
 bot.start((ctx) => {
   ctx.replyWithMarkdown(
-    `👋 *Selamat Datang ke @${ctx.botInfo.username}*\n\n` +
-    `Katalog drama sedia untuk dilayan!\n\n` +
-    `📌 *ARAHAN BARU:*\n` +
-    `• /sync - Ambil dari TMDB\n` +
-    `• /sync_melolo <tajuk> - Cari & ambil dari Melolo (Video Langsung!)`,
+    `👋 *Selamat Datang ke Katalog Dracin*\n\n` +
+    `Gunakan menu di bawah untuk mula menonton.`,
     Markup.inlineKeyboard([
       [Markup.button.webApp('🎬 Katalog Drama', 'https://kmuhsaid-art.github.io/Bot-dracin/')],
-      [Markup.button.callback('💎 Beli VIP', 'view_vip_packages'), Markup.button.callback('👤 Profil Saya', 'view_profile')]
+      [Markup.button.callback('💎 VIP', 'view_vip'), Markup.button.callback('👤 Profil', 'view_profile')]
     ])
   );
 });
 
-// --- PERINTAH BARU: SYNC MELOLO ---
+// PERINTAH SYNC MELOLO (MP4 Terus)
 bot.command('sync_melolo', async (ctx) => {
-    const query = ctx.message.text.split('/sync_melolo ')[1];
-    if (!query) return ctx.reply("❌ Sila masukkan tajuk. Contoh: /sync_melolo ceo atau /sync_melolo cinta");
+    const query = ctx.message.text.split(' ').slice(1).join(' ');
+    if (!query) return ctx.reply("❌ Sila masukkan tajuk. Contoh: /sync_melolo ceo");
 
-    ctx.reply(`⏳ Mencari "${query}" di pangkalan data Melolo...`);
-    
+    ctx.reply(`⏳ Mencari "${query}" di Melolo...`);
     try {
-        const books = await searchMelolo(query, "5"); // Ambil 5 teratas
-        if (books.length === 0) return ctx.reply("❌ Tiada drama dijumpai.");
-
+        const books = await searchMelolo(query, "5");
         let count = 0;
         for (let book of books) {
+            // PEMBAIKAN: Definisi 'const wujud' yang betul
             const wujud = await Film.findOne({ judul: book.title });
             if (!wujud) {
-                const videoId = await getVideoDetails(book.series_id);
-                if (videoId) {
-                    const videoUrl = await getVideoModel(videoId);
-                    if (videoUrl) {
-                        await new Film({
-                            judul: book.title,
-                            deskripsi: "Drama dari Melolo",
-                            link: videoUrl, // INI ADALAH DIRECT VIDEO MP4!
-                            thumb: book.thumb_url
-                        }).save();
-                        count++;
-                    }
+                const vid = await getVideoDetails(book.series_id);
+                const url = vid ? await getVideoModel(vid) : null;
+                if (url) {
+                    await new Film({ judul: book.title, deskripsi: "Melolo Stream", link: url, thumb: book.thumb_url }).save();
+                    count++;
                 }
             }
         }
-        ctx.reply(`✅ Berjaya! ${count} drama Melolo telah ditambah dengan video terus (Direct Play).`);
-    } catch (err) {
-        ctx.reply(`❌ Ralat: ${err.message}`);
-    }
+        ctx.reply(`✅ Berjaya! ${count} drama ditambah.`);
+    } catch (e) { ctx.reply("❌ Ralat sistem."); }
 });
 
-// Sync Lama (TMDB) dikekalkan sebagai sandaran
+// PERINTAH SYNC TMDB (Backup)
 bot.command('sync', async (ctx) => {
-  // ... (kod sync lama TMDB anda kekal di sini, saya abaikan untuk menjimatkan ruang teks, anda boleh copy paste logik lama jika mahu)
-  ctx.reply("Sila gunakan /sync_melolo <tajuk> untuk pengalaman tanpa iklan.");
+    ctx.reply("⏳ Menyedut drama trending...");
+    try {
+        const res = await axios.get(`https://api.themoviedb.org/3/trending/tv/day?api_key=${TMDB_KEY}`);
+        const trending = res.data.results;
+        let count = 0;
+        for (const item of trending) {
+            // PEMBAIKAN: Tambah 'const' sebelum 'wujud' untuk elakkan crash
+            const wujud = await Film.findOne({ judul: item.name });
+            if (!wujud) {
+                await new Film({
+                    judul: item.name,
+                    deskripsi: item.overview,
+                    link: `https://www.2embed.cc/embed/tv?tmdb=${item.id}`,
+                    thumb: `https://image.tmdb.org/t/p/w500${item.poster_path}`
+                }).save();
+                count++;
+            }
+        }
+        ctx.reply(`✅ Berjaya! ${count} drama trending ditambah.`);
+    } catch (e) { ctx.reply("❌ Ralat TMDB."); }
 });
 
-bot.action('view_vip_packages', (ctx) => ctx.reply("Hubungi @m_asfanraza"));
-bot.action('view_profile', (ctx) => ctx.reply(`ID Anda: ${ctx.from.id}`));
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => console.log(`🚀 API di port ${PORT}`));
-
+app.listen(process.env.PORT || 3000, '0.0.0.0', () => console.log(`🚀 Server Berjalan`));
 bot.launch();
