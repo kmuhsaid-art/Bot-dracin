@@ -49,8 +49,11 @@ async function searchMelolo(query, limit = "10") {
     "aid": "645713", 
     "app_name": "Melolo", 
     "device_platform": "android",
-    "language": "in"
+    "language": "in",
+    "channel": "googleplay",
+    "os_version": "9"
 };
+
 
         const res = await axios.get("https://api.tmtreader.com/i18n_novel/search/page/v1/", { 
             headers: meloloHeaders, 
