@@ -41,16 +41,11 @@
     <div id="videoContainer">
         <button class="close-btn" onclick="tutupVideo()">TUTUP [X]</button>
         <div class="loading-overlay">Memuatkan video...</div>
-<iframe 
-    id="embedPlayer" 
-    src="" 
-    allowfullscreen="true" 
-    webkitallowfullscreen="true" 
-    mozallowfullscreen="true"
-    allow="autoplay; encrypted-media"
-    style="width: 100%; height: 100%; border: none;">
-</iframe>
-
+        
+        <video id="embedPlayer" controls autoplay style="width: 100%; height: 100%; background: black; outline: none;">
+            <source src="" type="video/mp4">
+            Maaf, pelayar anda tidak menyokong pemain video ini.
+        </video>
     </div>
 
     <script>
@@ -91,20 +86,26 @@
 
         function bukaVideo(url) {
             const container = document.getElementById('videoContainer');
-            const iframe = document.getElementById('embedPlayer');
+            const videoPlayer = document.getElementById('embedPlayer'); // Tukar nama pembolehubah dari iframe ke videoPlayer
             
             // Pastikan URL menggunakan HTTPS
             const secureUrl = url.replace('http://', 'https://');
             
-            iframe.src = secureUrl;
+            // Masukkan link ke dalam video player
+            videoPlayer.src = secureUrl;
             container.style.display = 'flex';
+            
+            // Wajib panggil fungsi ini untuk HTML5 Video
+            videoPlayer.load(); 
+            videoPlayer.play(); 
         }
 
         function tutupVideo() {
             const container = document.getElementById('videoContainer');
-            const iframe = document.getElementById('embedPlayer');
+            const videoPlayer = document.getElementById('embedPlayer');
             
-            iframe.src = ''; 
+            videoPlayer.pause(); // Hentikan video sepenuhnya sebelum tutup
+            videoPlayer.src = ''; // Kosongkan source
             container.style.display = 'none';
         }
 
