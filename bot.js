@@ -21,23 +21,32 @@ const Film = mongoose.model('Film', {
 async function scrapeSekai(query) {
     try {
         const searchUrl = `https://drama.sansekai.my.id/?s=${encodeURIComponent(query)}`;
-        const { data } = await axios.get(searchUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+        const { data } = await axios.get(searchUrl, { 
+            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36' } 
+        });
         const $ = cheerio.load(data);
         const results = [];
 
-        $('.result-item').each((i, el) => {
-            const title = $(el).find('.title a').text().trim();
-            const link = $(el).find('.title a').attr('href');
+        // Penambahbaikan: Mencari elemen artikel yang mengandungi drama
+        $('article').each((i, el) => {
+            const title = $(el).find('h2.entry-title a, .title a').text().trim();
+            const link = $(el).find('h2.entry-title a, .title a').attr('href');
             const thumb = $(el).find('img').attr('src');
+            
             if (title && link) {
                 results.push({ judul: title, link: link, thumb: thumb });
             }
         });
+
+        console.log(`🔍 Dijumpai ${results.length} hasil untuk: ${query}`);
         return results;
-    } catch (e) { return []; }
+    } catch (e) { 
+        console.error("❌ Ralat Scraping:", e.message);
+        return []; 
+    }
 }
 
-bot.start((ctx) => {
+
   ctx.replyWithMarkdown(`👋 *Bot Dracin Terkini*\n\nGunakan /sync <tajuk> untuk menyedut drama dari SekaiDrama.`,
     Markup.inlineKeyboard([[Markup.button.webApp('🎬 Katalog Drama', 'https://kmuhsaid-art.github.io/Bot-dracin/')]])
   );
