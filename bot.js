@@ -22,38 +22,39 @@ const FilmSchema = new mongoose.Schema({
 });
 const Film = mongoose.model('Film', FilmSchema);
 
-// --- SCRAPER UNTUK GOODSHORT ---
 async function scrapeGoodShort(query) {
     try {
-        // GoodShort guna struktur URL carian macam ni
         const searchUrl = `https://www.goodshort.com/search?keyword=${encodeURIComponent(query)}`;
         const { data } = await axios.get(searchUrl, {
-            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+            headers: { 
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5'
+            }
         });
         const $ = cheerio.load(data);
         const results = [];
 
-        // Mencari kad drama dalam senarai carian GoodShort
-        $('.book-item, .search-result-item').each((i, el) => {
-            const title = $(el).find('.book-name, h3').text().trim();
-            let link = $(el).find('a').attr('href');
-            const thumb = $(el).find('img').attr('src');
-
-            // Pastikan link lengkap
-            if (link && !link.startsWith('http')) {
-                link = `https://www.goodshort.com${link}`;
-            }
+        // Kita cuba cari guna semua selector yang mungkin (Kad, List, atau Grid)
+        $('.book-item, .search-result-item, [class*="bookItem"], [class*="searchItem"]').each((i, el) => {
+            const title = $(el).find('[class*="name"], [class*="title"], h3').first().text().trim();
+            let link = $(el).find('a').first().attr('href');
+            let thumb = $(el).find('img').first().attr('src') || $(el).find('img').first().attr('data-src');
 
             if (title && link) {
+                if (!link.startsWith('http')) link = `https://www.goodshort.com${link}`;
                 results.push({ judul: title, link: link, thumb: thumb });
             }
         });
+
+        console.log(`Debug: Jumpa ${results.length} hasil.`); // Abang boleh tengok kat log Render
         return results;
     } catch (e) {
-        console.log("Ralat GoodShort:", e.message);
+        console.log("Ralat Scraper:", e.message);
         return [];
     }
 }
+
 
 // --- COMMAND BARU /FIND ---
 bot.command('find', async (ctx) => {
