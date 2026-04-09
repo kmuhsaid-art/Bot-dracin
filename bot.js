@@ -63,5 +63,23 @@ bot.command('sync', async (ctx) => {
 });
 
 app.listen(process.env.PORT || 3000, () => console.log(`🚀 Live`));
+
+// --- FUNGSI PADAM DRAMA ---
+bot.command('hapus', async (ctx) => {
+    const judul = ctx.message.text.split(' ').slice(1).join(' ').trim();
+    if (!judul) return ctx.reply("❌ Contoh: /hapus Tajuk Drama");
+
+    try {
+        const hasil = await Film.deleteOne({ judul: new RegExp(judul, 'i') });
+        if (hasil.deletedCount > 0) {
+            ctx.reply(`✅ Berjaya memadam drama: "${judul}"`);
+        } else {
+            ctx.reply(`❌ Drama "${judul}" tidak ditemui dalam database.`);
+        }
+    } catch (err) {
+        ctx.reply(`❌ Ralat: ${err.message}`);
+    }
+});
+
 bot.launch();
 
