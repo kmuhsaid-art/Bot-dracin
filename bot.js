@@ -69,19 +69,13 @@ bot.command('sync', async (ctx) => {
     const response = await axios.get(url);
     const dramas = response.data.results;
 
-    if (!dramas || dramas.length === 0) {
-      return ctx.reply("❌ Gagal mengambil data dari TMDB.");
-    }
-
     let count = 0;
     for (let item of dramas) {
-      // CARI drama dalam database menggunakan tajuk
+      // Gunakan nama pembolehubah yang konsisten
       const dramaWujud = await Film.findOne({ judul: item.name });
-      
       const videoLink = `https://embed.su/embed/tv/${item.id}`;
 
       if (!dramaWujud) {
-        // Jika drama BELUM ADA, simpan baru
         await new Film({
           judul: item.name,
           deskripsi: item.overview || "Drama trending minggu ini.",
@@ -90,17 +84,17 @@ bot.command('sync', async (ctx) => {
         }).save();
         count++;
       } else {
-        // Jika drama SUDAH ADA, kemas kini pautan videonya (supaya tidak hitam)
+        // PENTING: Kemas kini pautan lama yang rosak kepada embed.su
         dramaWujud.link = videoLink;
         await dramaWujud.save();
       }
     }
-    ctx.reply(`✅ Berjaya! Database telah dikemas kini dengan pautan aktif.`);
+    ctx.reply(`✅ Berjaya! Pautan video telah dikemas kini.`);
   } catch (err) {
-    console.error(err);
     ctx.reply(`❌ Ralat: ${err.message}`);
   }
 });
+
 
 // Fungsi Menambah Drama Manual
 bot.command('add', async (ctx) => {
