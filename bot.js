@@ -1,81 +1,86 @@
 const { Telegraf, Markup } = require('telegraf');
 const express = require('express'); 
 const mongoose = require('mongoose'); 
-const axios = require('axios');
-const cheerio = require('cheerio');
 const cors = require('cors');
 
 const app = express();
 app.use(cors());
 const bot = new Telegraf('8700274040:AAE_-p7po7H4SY3Da3Ta4I6qkPKczA09m6I');
 
-// --- MONGODB ---
+// --- SAMBUNGAN MONGODB ---
 mongoose.connect('mongodb+srv://Hahihu:Blink182@cluster0.i1btqnj.mongodb.net/dracinDB?retryWrites=true&w=majority')
   .then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.log("❌ MongoDB Error:", err));
 
-const FilmSchema = new mongoose.Schema({
+const Film = mongoose.model('Film', {
   judul: String,
-  deskripsi: String,
   link: String,
-  thumb: String
+  thumb: String,
+  deskripsi: String
 });
-const Film = mongoose.model('Film', FilmSchema);
 
-// --- SCRAPING ---
-async function scrapeSekai(query) {
-    try {
-        const searchUrl = `https://drama.sansekai.my.id/?s=${encodeURIComponent(query)}`;
-        const { data } = await axios.get(searchUrl, { 
-            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' } 
-        });
-        const $ = cheerio.load(data);
-        const results = [];
+// --- COMMAND BOT ---
+bot.start((ctx) => {
+  ctx.replyWithMarkdown(`👋 *Admin Flux Market*\n\nGunakan perintah di bawah untuk urus katalog:\n\n1. \`/tambah Judul | Link | Link_Gambar\`\n2. \`/hapus Nama Drama\`\n3. \`/list\` - Lihat semua drama`);
+});
 
-        $('article').each((i, el) => {
-            const title = $(el).find('h2.entry-title a').text().trim() || $(el).find('.title a').text().trim();
-            const link = $(el).find('h2.entry-title a').attr('href') || $(el).find('.title a').attr('href');
-            const thumb = $(el).find('img').attr('src');
-            if (title && link) results.push({ judul: title, link: link, thumb: thumb });
-        });
-        return results;
-    } catch (e) { return []; }
-}
-
-// --- BOT COMMANDS ---
-bot.start((ctx) => ctx.reply("Bot Aktif! Guna /sync <tajuk>"));
-
-bot.command('sync', async (ctx) => {
-    const query = ctx.message.text.split(' ').slice(1).join(' ').trim();
-    if (!query) return ctx.reply("❌ Contoh: /sync gadis");
-
-    ctx.reply(`⏳ Mencari "${query}"...`);
-    const dramas = await scrapeSekai(query);
-    
-    if (dramas.length === 0) return ctx.reply("❌ Tiada drama ditemui di website.");
-
-    let count = 0;
-    for (let d of dramas) {
-        // Guna findOne (Bukan find) untuk check data sedia ada
-        const wujud = await Film.findOne({ judul: d.judul });
-        if (!wujud) {
-            await new Film({
-                judul: d.judul,
-                deskripsi: "Sumber: SekaiDrama",
-                link: d.link,
-                thumb: d.thumb
-            }).save();
-            count++;
-        }
+// Fungsi Tambah Manual (Guna pipe | sebagai pemisah)
+bot.command('tambah', async (ctx) => {
+    const input = ctx.message.text.split(' ').slice(1).join(' ');
+    if (!input.includes('|')) {
+        return ctx.reply("❌ Format: /tambah Tajuk | Link | Link_Gambar");
     }
-    ctx.reply(count > 0 ? `✅ Berjaya simpan ${count} drama ke MongoDB!` : `ℹ️ Drama sudah ada dalam database.`);
+
+    const [judul, link, thumb] = input.split('|').map(s => s.trim());
+
+    try {
+        await new Film({
+            judul: judul,
+            link: link,
+            thumb: thumb || "https://via.placeholder.com/150",
+            deskripsi: "Drama pilihan Admin"
+        }).save();
+        ctx.reply(`✅ Berjaya disimpan: ${judul}`);
+    } catch (err) {
+        ctx.reply(`❌ Ralat: ${err.message}`);
+    }
 });
 
-// --- API UNTUK MINI APP ---
+// Fungsi Hapus
+bot.command('hapus', async (ctx) => {
+    const judul = ctx.message.text.split(' ').slice(1).join(' ').trim();
+    if (!judul) return ctx.reply("❌ Contoh: /hapus Gadis Titisan");
+
+    try {
+        const hasil = await Film.deleteOne({ judul: new RegExp(judul, 'i') });
+        if (hasil.deletedCount > 0) {
+            ctx.reply(`🗑️ Berjaya padam: ${judul}`);
+        } else {
+            ctx.reply(`❌ Drama tidak ditemui.`);
+        }
+    } catch (err) {
+        ctx.reply(`❌ Ralat: ${err.message}`);
+    }
+});
+
+// Fungsi List
+bot.command('list', async (ctx) => {
+    const films = await Film.find().limit(10);
+    if (films.length === 0) return ctx.reply("Database kosong.");
+    let msg = "🎬 *Senarai Drama Terkini:*\n\n";
+    films.forEach(f => msg += `• ${f.judul}\n`);
+    ctx.replyWithMarkdown(msg);
+});
+
+// --- API UNTUK MINI APP (GITHUB PAGES) ---
 app.get('/api/films', async (req, res) => {
-    const data = await Film.find();
-    res.json(data);
+    try {
+        const data = await Film.find();
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ ralat: err.message });
+    }
 });
 
-app.listen(process.env.PORT || 3000, () => console.log(`🚀 Live`));
+app.listen(process.env.PORT || 3000, () => console.log(`🚀 Server Bot & API Live`));
 bot.launch();
