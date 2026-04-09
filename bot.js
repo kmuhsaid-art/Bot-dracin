@@ -83,4 +83,3 @@ bot.command('sync', async (ctx) => {
 
 app.listen(process.env.PORT || 3000, () => console.log(`🚀 Bot Live`));
 bot.launch();
-
