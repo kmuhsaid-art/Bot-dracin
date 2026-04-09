@@ -43,14 +43,15 @@ const meloloParams = {
 async function searchMelolo(query, limit = "10") {
     try {
         // Gunakan parameter yang lebih ringkas untuk elakkan kegagalan API
-        const params = { 
-            ...meloloParams, 
-            query: query.trim(), 
-            limit: limit, 
-            offset: "0",
-            search_source: "1", // Tambah punca carian
-            _rticket: getRticket() 
-        };
+        const meloloParams = {
+    "iid": "7224810948585719302", 
+    "device_id": "7224810948585719302", 
+    "aid": "645713", 
+    "app_name": "Melolo", 
+    "device_platform": "android",
+    "language": "in"
+};
+
         const res = await axios.get("https://api.tmtreader.com/i18n_novel/search/page/v1/", { 
             headers: meloloHeaders, 
             params 
