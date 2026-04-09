@@ -69,22 +69,19 @@ bot.command('sync', async (ctx) => {
     const response = await axios.get(url);
     const dramas = response.data.results;
 
-    if (!wujud) { 
-   // ... kod simpan baru ...
-} else {
-   // Tambah ini untuk paksa kemaskini pautan video yang lama
-   wujud.link = `https://embed.su/embed/tv/${item.id}`;
-   await wujud.save();
-}
+    if (!dramas || dramas.length === 0) {
+      return ctx.reply("❌ Gagal mengambil data dari TMDB.");
+    }
 
     let count = 0;
     for (let item of dramas) {
-      const wujud = await Film.findOne({ judul: item.name });
+      // CARI drama dalam database menggunakan tajuk
+      const dramaWujud = await Film.findOne({ judul: item.name });
       
-      if (!wujud) {
-        // Menggunakan server embed.su yang lebih stabil untuk peranti mudah alih
-        const videoLink = `https://embed.su/embed/tv/${item.id}`;
+      const videoLink = `https://embed.su/embed/tv/${item.id}`;
 
+      if (!dramaWujud) {
+        // Jika drama BELUM ADA, simpan baru
         await new Film({
           judul: item.name,
           deskripsi: item.overview || "Drama trending minggu ini.",
@@ -92,9 +89,13 @@ bot.command('sync', async (ctx) => {
           thumb: `https://image.tmdb.org/t/p/w500${item.poster_path}`
         }).save();
         count++;
+      } else {
+        // Jika drama SUDAH ADA, kemas kini pautan videonya (supaya tidak hitam)
+        dramaWujud.link = videoLink;
+        await dramaWujud.save();
       }
     }
-    ctx.reply(`✅ Berjaya! ${count} drama trending dengan link aktif ditambah ke katalog.`);
+    ctx.reply(`✅ Berjaya! Database telah dikemas kini dengan pautan aktif.`);
   } catch (err) {
     console.error(err);
     ctx.reply(`❌ Ralat: ${err.message}`);
