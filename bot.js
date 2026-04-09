@@ -100,17 +100,28 @@ bot.start((ctx) => {
 });
 
 bot.command('sync', async (ctx) => {
+    // Gunakan kod ini untuk mengambil teks selepas arahan /sync
     const query = ctx.message.text.split(' ').slice(1).join(' ');
-    if (!query) return ctx.reply("❌ Sila masukkan tajuk. Contoh: /sync boss");
+    
+    if (!query) {
+        return ctx.reply("❌ Sila masukkan tajuk. Contoh: /sync boss");
+    }
 
     ctx.reply(`⏳ Mencari "${query}" di Melolo...`);
+    
     try {
         const books = await searchMelolo(query, "5");
-        if (books.length === 0) return ctx.reply("❌ Tiada drama dijumpai.");
+        
+        // Log untuk debug (boleh dilihat di log Render)
+        console.log(`Hasil carian untuk ${query}:`, books.length);
+
+        if (books.length === 0) {
+            return ctx.reply(`❌ Tiada drama dijumpai untuk tajuk "${query}". Cuba tajuk lain.`);
+        }
 
         let count = 0;
         for (let book of books) {
-            const wujud = await Film.findOne({ judul: book.title }); // Betulkan ralat 'wujud'
+            const wujud = await Film.findOne({ judul: book.title });
             if (!wujud) {
                 const vid = await getVideoDetails(book.series_id);
                 const url = vid ? await getVideoModel(vid) : null;
@@ -126,8 +137,11 @@ bot.command('sync', async (ctx) => {
             }
         }
         ctx.reply(`✅ Berjaya! ${count} drama Melolo telah ditambah.`);
-    } catch (e) { ctx.reply(`❌ Ralat: ${e.message}`); }
+    } catch (e) {
+        ctx.reply(`❌ Ralat sistem: ${e.message}`);
+    }
 });
+
 
 bot.action('view_vip', (ctx) => ctx.reply("Hubungi Admin untuk VIP."));
 bot.action('view_profile', (ctx) => ctx.reply(`ID: ${ctx.from.id}`));
