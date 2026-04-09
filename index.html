@@ -74,13 +74,13 @@ async function muatDrama() {
 
 function bukaVideo(url) {
     const container = document.getElementById('videoContainer');
-    // Kita tukar kepada Iframe supaya boleh buka link website/player
     container.innerHTML = `
         <button class="close-btn" onclick="tutupVideo()">TUTUP [X]</button>
         <iframe src="${url}" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>
     `;
     container.style.display = 'flex';
 }
+
 
 function tutupVideo() {
     const container = document.getElementById('videoContainer');
