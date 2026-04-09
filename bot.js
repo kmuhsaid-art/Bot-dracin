@@ -24,7 +24,7 @@ const Film = mongoose.model('Film', {
 const bot = new Telegraf('8700274040:AAE_-p7po7H4SY3Da3Ta4I6qkPKczA09m6I');
 
 const GLOBAL_PARAMS = {
-    "iid": "7224810948585719302",
+    "iid": "7224810948585719302", 
     "device_id": "7224810948585719302",
     "aid": "645713",
     "app_name": "Melolo",
@@ -122,4 +122,5 @@ bot.command('sync', async (ctx) => {
 
 app.listen(process.env.PORT || 3000, '0.0.0.0', () => console.log(`🚀 Live`));
 bot.launch();
+
 
