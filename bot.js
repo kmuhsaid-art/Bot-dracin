@@ -24,7 +24,6 @@ const Film = mongoose.model('Film', {
 });
 
 const bot = new Telegraf('8700274040:AAE_-p7po7H4SY3Da3Ta4I6qkPKczA09m6I');
-const TMDB_KEY = '92b7462311961dd095978dab2227d712'; 
 
 // --- 3. KONFIGURASI API MELOLO ---
 function getRticket() { return Date.now().toString(); }
@@ -89,8 +88,10 @@ app.get('/api/drama', async (req, res) => {
 // --- 5. LOGIK BOT TELEGRAM ---
 bot.start((ctx) => {
   ctx.replyWithMarkdown(
-    `👋 *Selamat Datang ke Katalog Dracin*\n\n` +
-    `Gunakan menu di bawah untuk mula menonton.`,
+    `👋 *Selamat Datang ke @${ctx.botInfo.username}*\n\n` +
+    `Katalog drama sedia untuk dilayan!\n\n` +
+    `📌 *ARAHAN:*\n` +
+    `• /sync <tajuk> - Cari & ambil drama dari Melolo`,
     Markup.inlineKeyboard([
       [Markup.button.webApp('🎬 Katalog Drama', 'https://kmuhsaid-art.github.io/Bot-dracin/')],
       [Markup.button.callback('💎 VIP', 'view_vip'), Markup.button.callback('👤 Profil', 'view_profile')]
@@ -98,54 +99,38 @@ bot.start((ctx) => {
   );
 });
 
-// PERINTAH SYNC MELOLO (MP4 Terus)
-bot.command('sync_melolo', async (ctx) => {
+bot.command('sync', async (ctx) => {
     const query = ctx.message.text.split(' ').slice(1).join(' ');
-    if (!query) return ctx.reply("❌ Sila masukkan tajuk. Contoh: /sync_melolo ceo");
+    if (!query) return ctx.reply("❌ Sila masukkan tajuk. Contoh: /sync boss");
 
     ctx.reply(`⏳ Mencari "${query}" di Melolo...`);
     try {
         const books = await searchMelolo(query, "5");
+        if (books.length === 0) return ctx.reply("❌ Tiada drama dijumpai.");
+
         let count = 0;
         for (let book of books) {
-            // PEMBAIKAN: Definisi 'const wujud' yang betul
-            const wujud = await Film.findOne({ judul: book.title });
+            const wujud = await Film.findOne({ judul: book.title }); // Betulkan ralat 'wujud'
             if (!wujud) {
                 const vid = await getVideoDetails(book.series_id);
                 const url = vid ? await getVideoModel(vid) : null;
                 if (url) {
-                    await new Film({ judul: book.title, deskripsi: "Melolo Stream", link: url, thumb: book.thumb_url }).save();
+                    await new Film({ 
+                        judul: book.title, 
+                        deskripsi: "Direct Stream Melolo", 
+                        link: url, 
+                        thumb: book.thumb_url 
+                    }).save();
                     count++;
                 }
             }
         }
-        ctx.reply(`✅ Berjaya! ${count} drama ditambah.`);
-    } catch (e) { ctx.reply("❌ Ralat sistem."); }
+        ctx.reply(`✅ Berjaya! ${count} drama Melolo telah ditambah.`);
+    } catch (e) { ctx.reply(`❌ Ralat: ${e.message}`); }
 });
 
-// PERINTAH SYNC TMDB (Backup)
-bot.command('sync', async (ctx) => {
-    ctx.reply("⏳ Menyedut drama trending...");
-    try {
-        const res = await axios.get(`https://api.themoviedb.org/3/trending/tv/day?api_key=${TMDB_KEY}`);
-        const trending = res.data.results;
-        let count = 0;
-        for (const item of trending) {
-            // PEMBAIKAN: Tambah 'const' sebelum 'wujud' untuk elakkan crash
-            const wujud = await Film.findOne({ judul: item.name });
-            if (!wujud) {
-                await new Film({
-                    judul: item.name,
-                    deskripsi: item.overview,
-                    link: `https://www.2embed.cc/embed/tv?tmdb=${item.id}`,
-                    thumb: `https://image.tmdb.org/t/p/w500${item.poster_path}`
-                }).save();
-                count++;
-            }
-        }
-        ctx.reply(`✅ Berjaya! ${count} drama trending ditambah.`);
-    } catch (e) { ctx.reply("❌ Ralat TMDB."); }
-});
+bot.action('view_vip', (ctx) => ctx.reply("Hubungi Admin untuk VIP."));
+bot.action('view_profile', (ctx) => ctx.reply(`ID: ${ctx.from.id}`));
 
-app.listen(process.env.PORT || 3000, '0.0.0.0', () => console.log(`🚀 Server Berjalan`));
+app.listen(process.env.PORT || 3000, '0.0.0.0', () => console.log(`🚀 API Berjalan`));
 bot.launch();
