@@ -60,7 +60,7 @@ async function searchMelolo(query, limit = "10") {
     'User-Agent': 'com.melolo.video/1.3.2 (Linux; U; Android 11; en_US; POCO F3 Build/RKQ1.200826.002)',
     'Host': 'api-va.tmtreader.com'
     }
-}
+})
         
         const books = [];
         // Pastikan kita menyemak semua kemungkinan struktur data dari Melolo
