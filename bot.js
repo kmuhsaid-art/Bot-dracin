@@ -55,12 +55,12 @@ async function searchMelolo(query, limit = "10") {
 };
 
 
-        const res = await axios.get("https://api.tmtreader.com/i18n_novel/search/page/v1/",  
+        const res = await axios.get("https://api.tmtreader.com/i18n_novel/search/page/v1/", { 
             headers: {
     'User-Agent': 'com.melolo.video/1.3.2 (Linux; U; Android 11; en_US; POCO F3 Build/RKQ1.200826.002)',
     'Host': 'api-va.tmtreader.com'
+    }
 }
-
         
         const books = [];
         // Pastikan kita menyemak semua kemungkinan struktur data dari Melolo
