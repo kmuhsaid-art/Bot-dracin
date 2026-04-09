@@ -41,48 +41,56 @@
     </div>
 
     <script>
-        const API_URL = 'https://bot-dracin.onrender.com/api/drama';
+        
+const API_URL = 'https://bot-dracin.onrender.com/api/films'; 
 
-        async function muatDrama() {
-            const res = await fetch(API_URL);
-            const dramas = await res.json();
-            const katalogDiv = document.getElementById('katalog');
-            katalogDiv.innerHTML = '';
-            dramas.forEach(drama => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <img src="${drama.thumb}">
-                    <div class="card-title">${drama.judul}</div>
-                    <div class="btn-watch" onclick="bukaVideo('${drama.link}')">▶️ TONTON</div>
-                `;
-                katalogDiv.appendChild(card);
-            });
+async function muatDrama() {
+    try {
+        const res = await fetch(API_URL);
+        const dramas = await res.json();
+        const katalogDiv = document.getElementById('katalog');
+        
+        if (dramas.length === 0) {
+            katalogDiv.innerHTML = '<p style="text-align:center; width:100%;">Tiada drama dalam pangkalan data.</p>';
+            return;
         }
 
-        function bukaVideo(url) {
-            const container = document.getElementById('videoContainer');
-            const videoPlayer = document.getElementById('embedPlayer');
-            const loading = document.getElementById('loadingText');
+        katalogDiv.innerHTML = '';
+        dramas.forEach(drama => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <img src="${drama.thumb}" onerror="this.src='https://via.placeholder.com/140x200?text=No+Image'">
+                <div class="card-title">${drama.judul}</div>
+                <div class="btn-watch" onclick="bukaVideo('${drama.link}')">▶️ TONTON</div>
+            `;
+            katalogDiv.appendChild(card);
+        });
+    } catch (err) {
+        console.error("Ralat muat data:", err);
+        document.getElementById('katalog').innerHTML = '<p style="color:red; text-align:center;">Gagal menyambung ke pelayan API.</p>';
+    }
+}
 
-            loading.style.display = 'block'; // Tunjuk semula teks loading
-            videoPlayer.src = url.replace('http://', 'https://');
-            container.style.display = 'flex';
-            
-            videoPlayer.load();
-            // Padam tulisan loading sebaik sahaja video boleh dimainkan
-            videoPlayer.onplaying = () => { loading.style.display = 'none'; };
-            videoPlayer.play();
-        }
+function bukaVideo(url) {
+    const container = document.getElementById('videoContainer');
+    // Kita tukar kepada Iframe supaya boleh buka link website/player
+    container.innerHTML = `
+        <button class="close-btn" onclick="tutupVideo()">TUTUP [X]</button>
+        <iframe src="${url}" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>
+    `;
+    container.style.display = 'flex';
+}
 
-        function tutupVideo() {
-            const videoPlayer = document.getElementById('embedPlayer');
-            videoPlayer.pause();
-            videoPlayer.src = '';
-            document.getElementById('videoContainer').style.display = 'none';
-        }
+function tutupVideo() {
+    const container = document.getElementById('videoContainer');
+    container.innerHTML = ''; // Padam iframe untuk hentikan suara video
+    container.style.display = 'none';
+}
 
-        muatDrama();
+// Jalankan fungsi
+muatDrama();
+
     </script>
 </body>
 </html>
