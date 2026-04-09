@@ -21,8 +21,14 @@ const Film = mongoose.model('Film', {
 
 // --- COMMAND BOT ---
 bot.start((ctx) => {
-  ctx.replyWithMarkdown(`👋 *Admin Flux Market*\n\nGunakan perintah di bawah untuk urus katalog:\n\n1. \`/tambah Judul | Link | Link_Gambar\`\n2. \`/hapus Nama Drama\`\n3. \`/list\` - Lihat semua drama`);
+  ctx.replyWithMarkdown(
+    `👋 *Selamat Datang ke Flux Market*\n\nKlik butang di bawah untuk melihat katalog drama terkini atau gunakan arahan admin.`,
+    Markup.inlineKeyboard([
+      [Markup.button.webApp('🎬 Buka Katalog Drama', 'https://kmuhsaid-art.github.io/Bot-dracin/')]
+    ])
+  );
 });
+
 
 // Fungsi Tambah Manual (Guna pipe | sebagai pemisah)
 bot.command('tambah', async (ctx) => {
