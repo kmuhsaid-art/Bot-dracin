@@ -40,19 +40,41 @@ const meloloParams = {
     "app_name": "Melolo", "device_platform": "android", "language": "in"
 };
 
-async function searchMelolo(query, limit = "5") {
+async function searchMelolo(query, limit = "10") {
     try {
-        const params = { ...meloloParams, query, limit, _rticket: getRticket() };
-        const res = await axios.get("https://api.tmtreader.com/i18n_novel/search/page/v1/", { headers: meloloHeaders, params });
+        // Gunakan parameter yang lebih ringkas untuk elakkan kegagalan API
+        const params = { 
+            ...meloloParams, 
+            query: query.trim(), 
+            limit: limit, 
+            offset: "0",
+            search_source: "1", // Tambah punca carian
+            _rticket: getRticket() 
+        };
+        const res = await axios.get("https://api.tmtreader.com/i18n_novel/search/page/v1/", { 
+            headers: meloloHeaders, 
+            params 
+        });
+        
         const books = [];
+        // Pastikan kita menyemak semua kemungkinan struktur data dari Melolo
         const searchData = res.data?.data?.search_data || [];
         searchData.forEach(item => {
             if (item.books) {
-                item.books.forEach(b => books.push({ series_id: b.book_id, title: b.book_name, thumb_url: b.thumb_url }));
+                item.books.forEach(b => {
+                    books.push({ 
+                        series_id: b.book_id, 
+                        title: b.book_name, 
+                        thumb_url: b.thumb_url 
+                    });
+                });
             }
         });
         return books;
-    } catch (e) { return []; }
+    } catch (e) { 
+        console.error("Melolo Search Error:", e.message);
+        return []; 
+    }
 }
 
 async function getVideoDetails(series_id) {
@@ -100,48 +122,51 @@ bot.start((ctx) => {
 });
 
 bot.command('sync', async (ctx) => {
-    // Gunakan kod ini untuk mengambil teks selepas arahan /sync
-    const query = ctx.message.text.split(' ').slice(1).join(' ');
-    
-    if (!query) {
-        return ctx.reply("❌ Sila masukkan tajuk. Contoh: /sync boss");
-    }
+    // Ambil semua teks selepas /sync secara bersih
+    const args = ctx.message.text.split(' ');
+    args.shift(); // Buang '/sync'
+    const query = args.join(' ').trim();
 
-    ctx.reply(`⏳ Mencari "${query}" di Melolo...`);
+    if (!query) return ctx.reply("❌ Sila masukkan tajuk. Contoh: /sync cinta");
+
+    ctx.reply(`⏳ Mencari "${query}" di pangkalan data Melolo...`);
     
     try {
-        const books = await searchMelolo(query, "5");
+        const books = await searchMelolo(query, "10");
         
-        // Log untuk debug (boleh dilihat di log Render)
-        console.log(`Hasil carian untuk ${query}:`, books.length);
-
-        if (books.length === 0) {
-            return ctx.reply(`❌ Tiada drama dijumpai untuk tajuk "${query}". Cuba tajuk lain.`);
+        if (!books || books.length === 0) {
+            return ctx.reply(`❌ Tiada drama dijumpai untuk "${query}".\n\nTips: Cuba guna satu perkataan sahaja (Contoh: /sync gadis)`);
         }
 
         let count = 0;
         for (let book of books) {
             const wujud = await Film.findOne({ judul: book.title });
             if (!wujud) {
-                const vid = await getVideoDetails(book.series_id);
-                const url = vid ? await getVideoModel(vid) : null;
-                if (url) {
-                    await new Film({ 
-                        judul: book.title, 
-                        deskripsi: "Direct Stream Melolo", 
-                        link: url, 
-                        thumb: book.thumb_url 
-                    }).save();
-                    count++;
+                const videoId = await getVideoDetails(book.series_id);
+                if (videoId) {
+                    const videoUrl = await getVideoModel(videoId);
+                    if (videoUrl) {
+                        await new Film({
+                            judul: book.title,
+                            deskripsi: "Drama Melolo Original",
+                            link: videoUrl,
+                            thumb: book.thumb_url
+                        }).save();
+                        count++;
+                    }
                 }
             }
         }
-        ctx.reply(`✅ Berjaya! ${count} drama Melolo telah ditambah.`);
-    } catch (e) {
-        ctx.reply(`❌ Ralat sistem: ${e.message}`);
+        
+        if (count === 0) {
+            ctx.reply(`ℹ️ Drama untuk "${query}" sudah ada dalam katalog atau tiada pautan video aktif.`);
+        } else {
+            ctx.reply(`✅ Berjaya! ${count} drama baharu telah ditambah ke katalog.`);
+        }
+    } catch (err) {
+        ctx.reply(`❌ Ralat teknikal: ${err.message}`);
     }
 });
-
 
 bot.action('view_vip', (ctx) => ctx.reply("Hubungi Admin untuk VIP."));
 bot.action('view_profile', (ctx) => ctx.reply(`ID: ${ctx.from.id}`));
