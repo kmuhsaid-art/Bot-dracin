@@ -89,7 +89,7 @@ bot.start((ctx) => {
       [Markup.button.webApp('🎬 Buka Katalog Drama', 'https://kmuhsaid-art.github.io/Bot-dracin/')],
       [
         Markup.button.callback('💎 Beli VIP', 'buy_vip'),
-        Markup.button.callback('💰 Cari Cuan', 'https://t.me/m_asfanraza')
+        Markup.button.callback('💰 Cari Cuan', 'sembang')
       ],
       [
         Markup.button.callback('👤 Profil', 'my_profile'),
@@ -102,7 +102,9 @@ bot.start((ctx) => {
 // Tambah aksi untuk butang (Contoh)
 bot.action('help_info', (ctx) => ctx.reply("Sila hubungi @m_asfanraza untuk bantuan teknikal."));
 
-bot.action('buy_vip', (ctx) => ctx.reply("Pek VIP: RM10/bulan. Hubungi admin untuk pengaktifan."));
+bot.action('sembang', (ctx) => ctx.reply ("https://t.me/m_asfanraza"));
+
+bot.action('buy_vip', (ctx) => ctx.reply("Pek VIP: RM10/bulan. Hubungi admin @m_asfanraza untuk pengaktifan."));
 
 bot.command('sync', async (ctx) => {
     const query = ctx.message.text.split(' ').slice(1).join(' ').trim();
