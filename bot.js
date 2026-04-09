@@ -82,8 +82,27 @@ bot.command('find', async (ctx) => {
     ctx.reply(count > 0 ? `✅ Berjaya auto-sync ${count} drama ke katalog!` : `ℹ️ Drama sudah sedia ada.`);
 });
 
-// --- BOT COMMANDS ---
-bot.start((ctx) => ctx.reply("Bot Aktif! Guna /sync <tajuk>"));
+bot.start((ctx) => {
+  ctx.replyWithMarkdown(
+    `👋 *Selamat Datang ke Flux Market Hub*\n\nPlatform tontonan drama terbaik dan peluang menjana pendapatan. Klik butang di bawah untuk bermula!`,
+    Markup.inlineKeyboard([
+      [Markup.button.webApp('🎬 Buka Katalog Drama', 'https://kmuhsaid-art.github.io/Bot-dracin/')],
+      [
+        Markup.button.callback('💎 Beli VIP', 'buy_vip'),
+        Markup.button.callback('💰 Cari Cuan', 'https://t.me/m_asfanraza')
+      ],
+      [
+        Markup.button.callback('👤 Profil', 'my_profile'),
+        Markup.button.callback('❓ Bantuan', 'help_info')
+      ]
+    ])
+  );
+});
+
+// Tambah aksi untuk butang (Contoh)
+bot.action('help_info', (ctx) => ctx.reply("Sila hubungi @m_asfanraza untuk bantuan teknikal."));
+
+bot.action('buy_vip', (ctx) => ctx.reply("Pek VIP: RM10/bulan. Hubungi admin untuk pengaktifan."));
 
 bot.command('sync', async (ctx) => {
     const query = ctx.message.text.split(' ').slice(1).join(' ').trim();
