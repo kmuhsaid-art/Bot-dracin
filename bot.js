@@ -29,10 +29,12 @@ const bot = new Telegraf('8700274040:AAE_-p7po7H4SY3Da3Ta4I6qkPKczA09m6I');
 function getRticket() { return Date.now().toString(); }
 
 const meloloHeaders = {
-    "Host": "api.tmtreader.com",
-    "Accept": "application/json; charset=utf-8,application/x-protobuf",
-    "X-Xs-From-Web": "false",
-    "User-Agent": "com.worldance.drama/49819 (Linux; U; Android 9; in; SM-N976N)",
+    'User-Agent': 'com.melolo.video/1.3.2 (Linux; U; Android 11; en_US; POCO F3 Build/RKQ1.200826.002)',
+    'Accept-Encoding': 'gzip, deflate',
+    'Connection': 'keep-alive',
+    'Host': 'api-va.tmtreader.com',
+    'x-tt-token': '', // Biarkan kosong jika tiada dalam sniffing
+    'sdk-version': '2'
 };
 
 const meloloParams = {
@@ -40,46 +42,52 @@ const meloloParams = {
     "app_name": "Melolo", "device_platform": "android", "language": "in"
 };
 
-async function searchMelolo(query, limit = "10") {
+async function searchMelolo(query, limit = "20") {
     try {
-        // Gunakan parameter yang lebih ringkas untuk elakkan kegagalan API
-        const meloloParams = {
-    "iid": "7334751412356784129", 
-    "device_id": "7224810948585719302", 
-    "aid": "645713", 
-    "app_name": "Melolo", 
-    "device_platform": "android",
-    "language": "in",
-    "channel": "googleplay",
-    "os_version": "9"
-};
-
-
-        const res = await axios.get("https://api.tmtreader.com/i18n_novel/search/page/v1/", { 
+        const res = await axios.get("https://api-va.tmtreader.com/i18n_novel/search/page/v1/", {
+            params: {
+                "query": query,
+                "limit": limit,
+                "iid": "7224810948585719302", // Pastikan ID ini segar
+                "device_id": "7224810948585719302",
+                "aid": "645713",
+                "app_name": "Melolo",
+                "device_platform": "android",
+                "language": "in"
+            },
             headers: {
-    'User-Agent': 'com.melolo.video/1.3.2 (Linux; U; Android 11; en_US; POCO F3 Build/RKQ1.200826.002)',
-    'Host': 'api-va.tmtreader.com'
-    }
-})
-        
-        const books = [];
-        // Pastikan kita menyemak semua kemungkinan struktur data dari Melolo
-        const searchData = res.data?.data?.search_data || [];
-        searchData.forEach(item => {
-            if (item.books) {
-                item.books.forEach(b => {
-                    books.push({ 
-                        series_id: b.book_id, 
-                        title: b.book_name, 
-                        thumb_url: b.thumb_url 
-                    });
-                });
+                'User-Agent': 'com.melolo.video/1.3.2 (Linux; U; Android 11; en_US; POCO F3 Build/RKQ1.200826.002)',
+                'Host': 'api-va.tmtreader.com'
             }
         });
+
+        // Debug: Lihat apa yang Melolo balas dalam log Render
+        console.log("Respon Melolo:", JSON.stringify(res.data));
+
+        const books = [];
+        // Pastikan kita semak sama ada data itu wujud sebelum guna .forEach
+        const searchData = res.data?.data?.search_data;
+
+        if (searchData && Array.isArray(searchData)) {
+            searchData.forEach(item => {
+                if (item.books && Array.isArray(item.books)) {
+                    item.books.forEach(b => {
+                        books.push({
+                            series_id: b.book_id,
+                            title: b.book_name,
+                            thumb_url: b.thumb_url
+                        });
+                    });
+                }
+            });
+        } else {
+            console.log("⚠️ Melolo memulangkan senarai kosong atau format salah.");
+        }
+
         return books;
-    } catch (e) { 
-        console.error("Melolo Search Error:", e.message);
-        return []; 
+    } catch (e) {
+        console.error("❌ Ralat API Melolo:", e.message);
+        return [];
     }
 }
 
