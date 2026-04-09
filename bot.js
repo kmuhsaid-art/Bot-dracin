@@ -46,7 +46,7 @@ async function scrapeSekai(query) {
     }
 }
 
-
+bot.start((ctx) => {
   ctx.replyWithMarkdown(`👋 *Bot Dracin Terkini*\n\nGunakan /sync <tajuk> untuk menyedut drama dari SekaiDrama.`,
     Markup.inlineKeyboard([[Markup.button.webApp('🎬 Katalog Drama', 'https://kmuhsaid-art.github.io/Bot-dracin/')]])
   );
