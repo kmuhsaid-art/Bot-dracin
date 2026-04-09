@@ -2,105 +2,130 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Katalog Drama Melolo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Melolo Premium</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: sans-serif; background-color: #121212; color: white; margin: 0; padding: 20px; }
-        h2 { text-align: center; color: #f39c12; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
-        .card { background: #1e1e1e; border-radius: 12px; overflow: hidden; border: 1px solid #333; text-align: center; }
-        .card img { width: 100%; height: 200px; object-fit: cover; }
-        .card-title { padding: 10px; font-size: 13px; height: 35px; overflow: hidden; }
-        .btn-watch { background: #f39c12; color: white; padding: 10px; cursor: pointer; font-weight: bold; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f0f0f; color: white; margin: 0; padding-bottom: 70px; }
+        .header { padding: 20px; text-align: center; background: linear-gradient(180deg, #f39c12 0%, #0f0f0f 100%); }
         
-        #videoContainer {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: black; z-index: 1000; flex-direction: column;
-        }
-        .close-btn { 
-            position: absolute; top: 15px; right: 15px; background: #e74c3c; 
-            color: white; padding: 10px; border-radius: 8px; z-index: 1001; border: none;
-        }
-        .loading-overlay {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: white; font-weight: bold; z-index: 999;
-        }
+        /* Grid Drama */
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 15px; }
+        .card { background: #1a1a1a; border-radius: 10px; overflow: hidden; position: relative; border: 1px solid #222; }
+        .card img { width: 100%; height: 230px; object-fit: cover; }
+        .card-info { padding: 8px; font-size: 12px; font-weight: bold; text-align: center; }
+        .btn-play { background: #f39c12; color: black; padding: 8px; text-align: center; cursor: pointer; font-size: 11px; font-weight: 800; }
+
+        /* Navigasi Bawah */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #161616; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #333; z-index: 100; }
+        .nav-item { color: #888; text-align: center; font-size: 10px; flex: 1; text-decoration: none; }
+        .nav-item i { font-size: 20px; display: block; margin-bottom: 4px; }
+        .nav-item.active { color: #f39c12; }
+
+        /* Video Container */
+        #videoContainer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 1000; }
+        .close-btn { position: absolute; top: 10px; right: 10px; background: rgba(231, 76, 60, 0.8); color: white; border: none; padding: 10px; border-radius: 5px; z-index: 1001; }
+
+        /* Sections */
+        .section { display: none; padding: 20px; }
+        .active-section { display: block; }
+        .vip-card { background: linear-gradient(45deg, #f39c12, #f1c40f); color: black; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; }
     </style>
 </head>
 <body>
-    <h2>🎬 KATALOG MELOLO</h2>
-    <div id="katalog" class="grid"></div>
+
+    <div id="sec-katalog" class="section active-section">
+        <div class="header"><h2>🎬 KATALOG MELOLO</h2></div>
+        <div id="katalog" class="grid"></div>
+    </div>
+
+    <div id="sec-vip" class="section">
+        <div class="header"><h2>💎 VIP MEMBERSHIP</h2></div>
+        <div class="vip-card">
+            <h3>PREMIUM PASS</h3>
+            <p>Tonton semua drama tanpa iklan & akses awal!</p>
+            <button onclick="Telegram.WebApp.showAlert('Sila hubungi Admin untuk pembayaran.')" style="padding:10px 20px; border-radius:20px; border:none; background:black; color:white; font-weight:bold;">BELI SEKARANG</button>
+        </div>
+    </div>
+
+    <div id="sec-cuan" class="section">
+        <div class="header"><h2>💰 CARI CUAN</h2></div>
+        <div style="text-align:center;">
+            <p>Sertai rangkaian <b>Flux Market</b> untuk jana pendapatan harian melalui trading dan pelaburan.</p>
+            <button onclick="window.location.href='https://t.me/your_link'" style="background:#27ae60; color:white; padding:15px; border-radius:10px; border:none; width:100%;">MULA JANA PENDAPATAN</button>
+        </div>
+    </div>
+
+    <div id="sec-profil" class="section">
+        <div class="header"><h2>👤 PROFIL SAYA</h2></div>
+        <div id="userInfo" style="text-align:center; padding:20px;"></div>
+    </div>
 
     <div id="videoContainer">
         <button class="close-btn" onclick="tutupVideo()">TUTUP [X]</button>
-        <div id="loadingText" class="loading-overlay">Memuatkan video...</div>
-        <video id="embedPlayer" controls autoplay style="width: 100%; height: 100%; background: black;">
-            <source src="" type="video/mp4">
-        </video>
+        <div id="playerArea" style="width:100%; height:100%;"></div>
     </div>
 
-    <script>
-        
-const API_URL = 'https://bot-dracin.onrender.com/api/films'; 
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active" onclick="showSec('sec-katalog', this)"><i class="fas fa-film"></i>Katalog</a>
+        <a href="#" class="nav-item" onclick="showSec('sec-vip', this)"><i class="fas fa-gem"></i>VIP</a>
+        <a href="#" class="nav-item" onclick="showSec('sec-cuan', this)"><i class="fas fa-dollar-sign"></i>Cari Cuan</a>
+        <a href="#" class="nav-item" onclick="showSec('sec-profil', this)"><i class="fas fa-user"></i>Profil</a>
+    </nav>
 
-async function muatDrama() {
-    try {
-        const res = await fetch(API_URL);
-        const dramas = await res.json();
-        const katalogDiv = document.getElementById('katalog');
-        
-        if (dramas.length === 0) {
-            katalogDiv.innerHTML = '<p style="text-align:center; width:100%;">Tiada drama dalam pangkalan data.</p>';
-            return;
+    <script>
+        const API_URL = 'https://bot-dracin.onrender.com/api/films';
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // Tunjuk Profil User Telegram
+        document.getElementById('userInfo').innerHTML = `
+            <img src="https://ui-avatars.com/api/?name=${tg.initDataUnsafe.user?.first_name}&background=f39c12&color=fff" style="border-radius:50%; width:80px;"><br>
+            <h3>${tg.initDataUnsafe.user?.first_name || 'Pengguna'}</h3>
+            <p>Status: Free Member</p>
+        `;
+
+        function showSec(id, el) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active-section'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.add('active-section');
+            el.classList.add('active');
         }
 
-        katalogDiv.innerHTML = '';
-        dramas.forEach(drama => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-                <img src="${drama.thumb}" onerror="this.src='https://via.placeholder.com/140x200?text=No+Image'">
-                <div class="card-title">${drama.judul}</div>
-                <div class="btn-watch" onclick="bukaVideo('${drama.link}')">▶️ TONTON</div>
-            `;
-            katalogDiv.appendChild(card);
-        });
-    } catch (err) {
-        console.error("Ralat muat data:", err);
-        document.getElementById('katalog').innerHTML = '<p style="color:red; text-align:center;">Gagal menyambung ke pelayan API.</p>';
-    }
-}
+        async function muatDrama() {
+            try {
+                const res = await fetch(API_URL);
+                const dramas = await res.json();
+                const katalogDiv = document.getElementById('katalog');
+                katalogDiv.innerHTML = '';
+                dramas.forEach(drama => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <img src="${drama.thumb}" onerror="this.src='https://via.placeholder.com/200x300'">
+                        <div class="card-info">${drama.judul}</div>
+                        <div class="btn-play" onclick="bukaVideo('${drama.link}')">▶️ TONTON</div>
+                    `;
+                    katalogDiv.appendChild(card);
+                });
+            } catch (e) { console.error(e); }
+        }
 
-function bukaVideo(url) {
-    const container = document.getElementById('videoContainer');
-    
-    // Pastikan link menggunakan https
-    const secureUrl = url.replace('http://', 'https://');
-    
-    // Kita gunakan iframe untuk paparkan website player asal
-    container.innerHTML = `
-        <button class="close-btn" onclick="tutupVideo()">TUTUP [X]</button>
-        <iframe 
-            src="${secureUrl}" 
-            style="width: 100%; height: 100%; border: none;" 
-            allow="autoplay; fullscreen; picture-in-picture" 
-            allowfullscreen>
-        </iframe>
-    `;
-    
-    container.style.display = 'flex';
-}
+        function bukaVideo(url) {
+            const container = document.getElementById('videoContainer');
+            const playerArea = document.getElementById('playerArea');
+            const secureUrl = url.replace('http://', 'https://');
+            playerArea.innerHTML = `<iframe src="${secureUrl}" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>`;
+            container.style.display = 'block';
+        }
 
-function tutupVideo() {
-    const container = document.getElementById('videoContainer');
-    container.innerHTML = ''; // Padam isi untuk hentikan suara/video
-    container.style.display = 'none';
-}
+        function tutupVideo() {
+            document.getElementById('videoContainer').style.display = 'none';
+            document.getElementById('playerArea').innerHTML = '';
+        }
 
-// Jalankan fungsi
-muatDrama();
-
+        muatDrama();
     </script>
 </body>
 </html>
