@@ -44,7 +44,7 @@ async function searchMelolo(query, limit = "10") {
     try {
         // Gunakan parameter yang lebih ringkas untuk elakkan kegagalan API
         const meloloParams = {
-    "iid": "7224810948585719302", 
+    "iid": "7334751412356784129", 
     "device_id": "7224810948585719302", 
     "aid": "645713", 
     "app_name": "Melolo", 
