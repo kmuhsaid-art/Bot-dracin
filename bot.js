@@ -2,36 +2,40 @@ const { Telegraf, Markup } = require('telegraf');
 const express = require('express');
 
 const app = express();
-// Masukkan Token Bot Telegram abang di bawah
+// Token Bot abang
 const bot = new Telegraf('8700274040:AAE_-p7po7H4SY3Da3Ta4I6qkPKczA09m6I');
 
-// --- 1. MENU UTAMA (Muncul bila taip /start) ---
+// --- MENU UTAMA ---
 bot.start((ctx) => {
   ctx.replyWithMarkdown(
-    `👋 *Selamat Datang ke Flux Market Hub*\n\nNikmati ribuan drama Asia secara percuma dan pantas di sini. Klik butang di bawah untuk menonton!`,
+    `👋 *Selamat Datang ke Cidrama Lovers Hub*\n\nPlatform tontonan drama terbaik dan peluang menjana pendapatan. Klik butang di bawah untuk bermula!`,
     Markup.inlineKeyboard([
+      // Baris 1: Buka Mini App Drama
       [Markup.button.webApp('🎬 Buka Katalog Drama', 'https://kmuhsaid-art.github.io/Bot-dracin/')],
+      
+      // Baris 2: Butang Cari Cuan (Gantikan link di bawah dengan link grup abang)
+      [Markup.button.url('💰 CARI CUAN (GRUP TELEGRAM)', 'https://t.me/+H0HlTVJXRoQ3Y2E1')], 
+      
+      // Baris 3: Hubungi Admin
       [Markup.button.url('💬 Hubungi Admin', 'https://t.me/m_asfanraza')]
     ])
   );
 });
 
-// --- 2. JALANKAN SERVER (Untuk Render) ---
-// Kita guna Express supaya Render tak anggap bot ni mati
+// --- SERVER UNTUK RENDER ---
 app.get('/', (req, res) => {
-    res.send('Bot Dracin Flux Market sedang berjalan...');
+    res.send('Bot Flux Market Aktif!');
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`🚀 Server sedia di port ${PORT}`);
+    console.log(`🚀 Server berjalan di port ${PORT}`);
 });
 
-// --- 3. PELANCARAN BOT ---
 bot.launch()
   .then(() => console.log("✅ Bot Berjaya Dilancarkan!"))
-  .catch(err => console.error("❌ Gagal melancarkan bot:", err));
+  .catch(err => console.error("❌ Gagal:", err));
 
-// Enable graceful stop
+// Graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
