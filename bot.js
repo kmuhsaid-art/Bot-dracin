@@ -5,36 +5,41 @@ const app = express();
 // Token Bot abang
 const bot = new Telegraf('8700274040:AAE_-p7po7H4SY3Da3Ta4I6qkPKczA09m6I');
 
-// --- MENU UTAMA ---
+// --- MENU UTAMA JOMNONTON BOT ---
 bot.start((ctx) => {
-  ctx.replyWithMarkdown(
-    `👋 *Selamat Datang ke Cidrama Lovers Hub*\n\nPlatform tontonan drama terbaik dan peluang menjana pendapatan. Klik butang di bawah untuk bermula!`,
-    Markup.inlineKeyboard([
-      // Baris 1: Buka Mini App Drama
-      [Markup.button.webApp('🎬 Buka Katalog Drama', 'https://kmuhsaid-art.github.io/Bot-dracin/')],
-      
-      // Baris 2: Butang Cari Cuan (Gantikan link di bawah dengan link grup abang)
-      [Markup.button.url('💰 CARI CUAN (GRUP TELEGRAM)', 'https://t.me/+H0HlTVJXRoQ3Y2E1')], 
-      
-      // Baris 3: Hubungi Admin
-      [Markup.button.url('💬 Hubungi Admin', 'https://t.me/m_asfanraza')]
-    ])
-  );
+  try {
+    ctx.replyWithMarkdown(
+      `👋 *Selamat Datang ke JomNonton Bot*\n\nPlatform tontonan drama terbaik dan Percuma. Klik butang di bawah!`,
+      Markup.inlineKeyboard([
+        // Baris 1: Buka Mini App Drama
+        [Markup.button.webApp('🎬 Buka Katalog Drama', 'https://kmuhsaid-art.github.io/Bot-dracin/')],
+        
+        // Baris 2: Butang Cari Cuan dengan link grup baru abang
+        [Markup.button.url('💰 CARI CUAN (KLIK SINI)', 'https://t.me/+H0HlTVJXRoQ3Y2E1')], 
+        
+        // Baris 3: Hubungi Admin
+        [Markup.button.url('💬 Hubungi Admin', 'https://t.me/m_asfanraza')]
+      ])
+    );
+  } catch (e) {
+    console.error("Ralat pada menu utama:", e);
+  }
 });
 
 // --- SERVER UNTUK RENDER ---
 app.get('/', (req, res) => {
-    res.send('Bot Flux Market Aktif!');
+    res.send('JomNonton Bot is Active!');
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 Server berjalan di port ${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 JomNonton Bot sedia di port ${PORT}`);
 });
 
+// --- PELANCARAN BOT ---
 bot.launch()
-  .then(() => console.log("✅ Bot Berjaya Dilancarkan!"))
-  .catch(err => console.error("❌ Gagal:", err));
+  .then(() => console.log("✅ JomNonton Bot Berjaya Dilancarkan!"))
+  .catch(err => console.error("❌ Gagal Launch:", err));
 
 // Graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));
