@@ -104,6 +104,37 @@ bot.action('help_info', (ctx) => ctx.reply("Sila hubungi @m_asfanraza untuk bant
 
 bot.action('buy_vip', (ctx) => ctx.reply("Pek VIP: RM10/bulan. Hubungi admin @m_asfanraza untuk pengaktifan."));
 
+bot.command('tambah', async (ctx) => {
+    const input = ctx.message.text.split(' ').slice(1).join(' ');
+    
+    if (!input.includes('|')) {
+        return ctx.reply("❌ Format Salah!\nGuna: /tambah Tajuk | Link | Gambar");
+    }
+
+    // Bagitahu user yang bot sedang proses
+    const loading = await ctx.reply("⏳ Sedang menyimpan ke database...");
+
+    const [judul, link, thumb] = input.split('|').map(s => s.trim());
+
+    try {
+        const filmBaru = new Film({ 
+            judul, 
+            link, 
+            thumb, 
+            deskripsi: "Koleksi Terbaru" 
+        });
+        
+        await filmBaru.save();
+        
+        // Kemaskini mesej tadi kepada berjaya
+        ctx.telegram.editMessageText(ctx.chat.id, loading.message_id, null, `✅ BERJAYA DISIMPAN!\n\n🎬 Judul: ${judul}\n\nSila semak di Mini App sekarang.`);
+    } catch (err) {
+        console.error(err);
+        ctx.telegram.editMessageText(ctx.chat.id, loading.message_id, null, `❌ RALAT DB: ${err.message}`);
+    }
+});
+
+
 bot.command('sync', async (ctx) => {
     const query = ctx.message.text.split(' ').slice(1).join(' ').trim();
     if (!query) return ctx.reply("❌ Contoh: /sync gadis");
