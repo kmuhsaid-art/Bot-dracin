@@ -1,21 +1,17 @@
 <!DOCTYPE html>
-<html lang="ms">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Melolo x Sansekai</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #000; }
-        iframe { width: 100%; height: 100%; border: none; }
-    </style>
-</head>
-<body>
-    <iframe src="https://drama.sansekai.my.id/" allowfullscreen sandbox="allow-forms allow-scripts allow-same-origin"></iframe>
-
     <script>
+        // Inisialisasi Telegram WebApp
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Biar skrin jadi penuh
+        tg.expand(); 
+
+        // Terus hantar user ke website Sansekai
+        window.location.href = "https://drama.sansekai.my.id/";
     </script>
+</head>
+<body style="background-color: black;">
+    <h3 style="color: white; text-align: center; margin-top: 50%;">Memuatkan Katalog Drama...</h3>
 </body>
 </html>
