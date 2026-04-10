@@ -9,10 +9,9 @@ app.use(express.json());
 
 const bot = new Telegraf('8700274040:AAE_-p7po7H4SY3Da3Ta4I6qkPKczA09m6I');
 
-// --- SAMBUNGAN MONGODB ---
-mongoose.connect('mongodb+srv://Hahihu:Blink182@cluster0.i1btqnj.mongodb.net/dracinDB?retryWrites=true&w=majority')
-  .then(() => console.log("✅ MongoDB Berjaya Disambung"))
-  .catch(err => console.error("❌ Ralat MongoDB:", err));
+// Gunakan format link yang lebih ringkas jika ralat queryTxt masih berlaku
+mongoose.connect('mongodb://Hahihu:Blink182@cluster0-shard-00-00.i1btqnj.mongodb.net:27017,cluster0-shard-00-01.i1btqnj.mongodb.net:27017,cluster0-shard-00-02.i1btqnj.mongodb.net:27017/dracinDB?ssl=true&replicaSet=atlas-xxxxxx-shard-0&authSource=admin&retryWrites=true&w=majority')
+
 
 const Film = mongoose.model('Film', {
   judul: String,
